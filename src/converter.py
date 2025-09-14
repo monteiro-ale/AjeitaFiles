@@ -36,9 +36,6 @@ def list_xlsx_files():
     files = [f for f in os.listdir(XLSX_DIR) if f.lower().endswith(".xlsx")]
     if not files:
       print("⚠️ Nenhum arquivo XLSX encontrado na pasta data/xlsx")
-      print(BASE_DIR)
-      print(XLSX_DIR)
-      print(CSV_DIR)
       time.sleep(10)
       return
     else:
@@ -71,8 +68,8 @@ def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"):
             df = pd.read_excel(xls, sheet_name=sheet_name)
             base_name = os.path.splitext(os.path.basename(input_path))[0]
             output_file = f"{base_name}_{sheet_name}.csv"
-            output_path = os.path.join(output_dir, output_file)  # <- aqui usa a pasta de saída
-            os.makedirs(output_dir, exist_ok=True)  # garante que a pasta exista
+            output_path = os.path.join(output_dir, output_file)
+            os.makedirs(output_dir, exist_ok=True)
             df.to_csv(output_path, index=False, encoding=encoding)
             print(f"✅ Aba '{sheet_name}' convertida: {output_path}")
     except FileNotFoundError:
@@ -80,7 +77,7 @@ def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"):
         return
     except Exception as e:
         print(f"Erro ao converter: {e}")
-        time.sleep(10)
+        time.sleep(8)
         return
 
 def list_csv_files():
@@ -88,9 +85,6 @@ def list_csv_files():
     files = [f for f in os.listdir(CSV_DIR) if f.lower().endswith(".csv")]
     if not files:
       print("⚠️ Nenhum arquivo CSV encontrado na pasta data/csv.")
-      print(BASE_DIR)
-      print(XLSX_DIR)
-      print(CSV_DIR)
       time.sleep(5)
       return
 
