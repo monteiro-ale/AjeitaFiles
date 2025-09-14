@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-import converter
+from src import converter
 
 def main_menu():
     while True:

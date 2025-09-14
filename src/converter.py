@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import time
 import chardet
-from config import XLSX_DIR, CSV_DIR, BASE_DIR
+from src.config import XLSX_DIR, CSV_DIR, BASE_DIR
 
 def convert_menu():
     while True:
@@ -21,11 +21,11 @@ def convert_menu():
           os.system("cls")
           return
       elif opcao == "1":
-        list_xlsx_files()
+        exec_convert_format()
         os.system("cls")
       elif opcao == "2":
-          list_csv_files()
-          os.system("cls")
+        exec_convert_encoding()
+        os.system("cls")
       else: 
         print("⚠️ Opção inválida, tente novamente!")
         time.sleep(1)
@@ -36,30 +36,10 @@ def list_xlsx_files():
     files = [f for f in os.listdir(XLSX_DIR) if f.lower().endswith(".xlsx")]
     if not files:
       print("⚠️ Nenhum arquivo XLSX encontrado na pasta data/xlsx")
-      time.sleep(10)
+      time.sleep(5)
       return
     else:
-      os.system("cls")
-      print("=" * 38)
-      for idx, f in enumerate(files, start=1):
-         print(f"{idx} - {f}")
-      print("=" * 38)
-
-      opcao = input("Escolha o arquivo para converter (ou 0 para voltar): ")
-      if opcao == "0":
-         return
-      elif opcao.isdigit() and 1 <= int(opcao) <= len(files):
-         arquivo_selecionado = files[int(opcao)-1]
-         input_path = os.path.join(XLSX_DIR, arquivo_selecionado)
-         output_file = os.path.splitext(arquivo_selecionado)[0] + ".csv"
-         output_path = CSV_DIR
-         convert_xlsx_to_csv(input_path, output_path)
-         time.sleep(1.5)
-      else:
-         print("=" * 38)
-         print("\n⚠️ Opção inválida, tente novamente!")
-         time.sleep(1)
-         return
+      return files
  
 def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"):   
     try:
@@ -87,19 +67,8 @@ def list_csv_files():
       print("⚠️ Nenhum arquivo CSV encontrado na pasta data/csv.")
       time.sleep(5)
       return
-
-    for idx, f in enumerate(files, start=1):
-      print(f"{idx} - {f}")
-
-    escolha = input("Escolha o arquivo para converter (ou 0 para voltar): ")
-
-    if escolha == "0":
-      return
-    elif escolha.isdigit() and 1 <= int(escolha) <= len(files):
-      escolha_valida(files, escolha)
     else:
-      print("⚠️ Opção inválida, tente novamente!")
-      time.sleep(1)  
+      return files
 
 def convert_csv_encoding(input_path, output_path, target_encoding="utf-8"):
     try:
@@ -155,4 +124,45 @@ def encoding_info(original_encoding):
    info = familias.get(original_encoding.lower(), "Não tenho mais infos pra este encoding D:")
    return print(f"Encoding detectado: {original_encoding} Infos → {info}")
 
+def exec_convert_encoding():
+    files = list_csv_files()
+    os.system("cls")
+    print("=" * 38)
+    for idx, f in enumerate(files, start=1): 
+      print(f"{idx} - {f}")
+    print("=" * 38)
+
+    escolha = input("Escolha o arquivo para converter (ou 0 para voltar): ")
+
+    if escolha == "0":
+      return
+    elif escolha.isdigit() and 1 <= int(escolha) <= len(files):
+      escolha_valida(files, escolha)
+    else:
+      print("⚠️ Opção inválida, tente novamente!")
+      time.sleep(1)    
+
+def exec_convert_format():
+    files = list_xlsx_files()
+    os.system("cls")
+    print("=" * 38)
+    for idx, f in enumerate(files, start=1):
+      print(f"{idx} - {f}")
+    print("=" * 38)
+
+    opcao = input("Escolha o arquivo para converter (ou 0 para voltar): ")
+    if opcao == "0":
+      return
+    elif opcao.isdigit() and 1 <= int(opcao) <= len(files):
+      arquivo_selecionado = files[int(opcao)-1]
+      input_path = os.path.join(XLSX_DIR, arquivo_selecionado)
+      output_file = os.path.splitext(arquivo_selecionado)[0] + ".csv"
+      output_path = CSV_DIR
+      convert_xlsx_to_csv(input_path, output_path)
+      time.sleep(1.5)
+    else:
+      print("=" * 38)
+      print("\n⚠️ Opção inválida, tente novamente!")
+      time.sleep(1)
+      return
 
