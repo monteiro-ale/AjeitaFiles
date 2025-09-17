@@ -3,6 +3,7 @@ import pandas as pd
 import time
 import chardet
 from src.config import XLSX_DIR, CSV_DIR, BASE_DIR
+from src.utils import *
 
 def convert_menu():
     while True:
@@ -18,28 +19,18 @@ def convert_menu():
       opcao = input("Escolha uma opção: ")
 
       if opcao == "0":
-          os.system("cls")
+          clear()
           return
       elif opcao == "1":
         exec_convert_format()
-        os.system("cls")
+        clear()
       elif opcao == "2":
         exec_convert_encoding()
-        os.system("cls")
+        clear()
       else: 
         print("⚠️ Opção inválida, tente novamente!")
         time.sleep(1)
-        os.system("cls")
-
-def list_xlsx_files():
-    #Lista arquivos XLSX da pasta data/xlsx
-    files = [f for f in os.listdir(XLSX_DIR) if f.lower().endswith(".xlsx")]
-    if not files:
-      print("⚠️ Nenhum arquivo XLSX encontrado na pasta data/xlsx")
-      time.sleep(5)
-      return
-    else:
-      return files
+        clear()
  
 def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"):   
     try:
@@ -59,16 +50,6 @@ def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"):
         print(f"Erro ao converter: {e}")
         time.sleep(8)
         return
-
-def list_csv_files():
-    #Lista os csv's da folder csv.
-    files = [f for f in os.listdir(CSV_DIR) if f.lower().endswith(".csv")]
-    if not files:
-      print("⚠️ Nenhum arquivo CSV encontrado na pasta data/csv.")
-      time.sleep(5)
-      return
-    else:
-      return files
 
 def convert_csv_encoding(input_path, output_path, target_encoding="utf-8"):
     try:
@@ -94,7 +75,8 @@ def detecta_encoding(input_path, sample_size=100000):
       return None
    except Exception as e:
     print(f"❌ Erro ao detectar encoding: {e}")
-    time.sleep(8)
+    print("Voltando ao menu anterior...")
+    time.sleep(2)
     return None
 
 def escolha_valida(files, escolha):
@@ -126,7 +108,7 @@ def encoding_info(original_encoding):
 
 def exec_convert_encoding():
     files = list_csv_files()
-    os.system("cls")
+    clear()
     print("=" * 38)
     for idx, f in enumerate(files, start=1): 
       print(f"{idx} - {f}")
@@ -144,7 +126,7 @@ def exec_convert_encoding():
 
 def exec_convert_format():
     files = list_xlsx_files()
-    os.system("cls")
+    clear()
     print("=" * 38)
     for idx, f in enumerate(files, start=1):
       print(f"{idx} - {f}")

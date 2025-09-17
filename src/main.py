@@ -2,6 +2,7 @@ import os
 import sys
 import time
 from src import converter
+from src import quack
 
 def main_menu():
     while True:
@@ -29,7 +30,8 @@ def main_menu():
             time.sleep(1)
             os.system("cls")
         elif opcao == "3":
-            print("\n>> [Rodar Query SQL ainda não implementado]")
+            quack.pato_menu()
+            #print("\n>> [Rodar Query SQL ainda não implementado]")
             time.sleep(1)
             os.system("cls")
         else:
