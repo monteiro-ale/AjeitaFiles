@@ -23,10 +23,12 @@ def pato_menu():
         return
     elif e == "1":
         clear()
-        importa_csv_banco()
+        persistence = True
+        importa_csv_banco(persistence)
     elif e == "2":
-        print(">>Ainda não implementado")
-        time.sleep(3)
+        clear()
+        persistence = False
+        importa_csv_banco(persistence)
         return
     elif e == "3":
       print(">>Ainda não implementado")
@@ -36,8 +38,8 @@ def pato_menu():
         print("Opção inválida, digite apenas números")
         return
 
-def importa_csv_banco():
-    path = f"{BASE_DIR}"+"\\ajeitafiles.duckdb" #-> CASO NAO DE DIRETO NO BANCO
+def importa_csv_banco(persistence):
+    path = f"{BASE_DIR}"+"\\ajeitafiles.duckdb" 
     con = conectar_duckdb(path)
     if not con: return
     else:
@@ -46,7 +48,7 @@ def importa_csv_banco():
       list_all(tables, files)
       arq = selecionar_arquivos(files)
       if arq:
-        pl = carregar_arquivos(con, arq)
+        pl = carregar_arquivos(con, arq, persistence)
         if pl:
             print("=" * 60)
             print(f"⚡ Arquivos carregados em memória:")
@@ -55,7 +57,11 @@ def importa_csv_banco():
             print("=" * 60)
             loop_interativo(pl)
         else: return
-      else: return
+      else: return #que tripa de codigo horrivel...
+
+
+def query_in_db():
+    pass
 
 def list_all(tables, files):
     if tables:
@@ -121,21 +127,25 @@ def selecionar_arquivos(files):
         except ValueError:
             print("⚠️ Entrada inválida. Digite apenas números separados por vírgula.")
 
-def carregar_arquivos(con, arquivos):
-    try:
-        for arq in arquivos:
-          caminho = os.path.join(CSV_DIR, arq)
-          nome_tabela = os.path.splitext(arq)[0]
-          con.execute(
-          f"CREATE OR REPLACE TEMP TABLE {nome_tabela} AS SELECT * FROM read_csv_auto('{caminho}')"
-          ) # Trollando (depois arrumo, lol)
-          print(f"[OK] Tabela carregada: {nome_tabela}")
-        return con
-    except Exception as e:
-        print(f"Erro ao carregar {arq}: {e}")
-        time.sleep(5)
-        clear()
-        return None
+def carregar_arquivos(con, arquivos, persistence):
+      if persistence:
+        query = "CREATE OR REPLACE TABLE"
+      else:
+        query = "CREATE OR REPLACE TEMP TABLE"
+      try:
+          for arq in arquivos:
+            caminho = os.path.join(CSV_DIR, arq)
+            nome_tabela = os.path.splitext(arq)[0]
+            con.execute(
+            f"{query} {nome_tabela} AS SELECT * FROM read_csv_auto('{caminho}')"
+            ) # Trollando (depois arrumo, lol)
+            print(f"[OK] Tabela carregada: {nome_tabela}")
+          return con
+      except Exception as e:
+          print(f"Erro ao carregar {arq}: {e}")
+          time.sleep(5)
+          clear()
+          return None
 
 def loop_interativo(con):
     clear()
