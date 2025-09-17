@@ -122,21 +122,20 @@ def selecionar_arquivos(files):
             print("⚠️ Entrada inválida. Digite apenas números separados por vírgula.")
 
 def carregar_arquivos(con, arquivos):
-    for arq in arquivos:
-        caminho = os.path.join(CSV_DIR, arq)
-        nome_tabela = os.path.splitext(arq)[0]
-
-        try:
-            con.execute(
-                f"CREATE OR REPLACE TEMP TABLE {nome_tabela} AS SELECT * FROM read_csv_auto('{caminho}')"
-            ) # Trollando (depois arrumo, lol)
-            print(f"[OK] Tabela carregada: {nome_tabela}")
-            return con
-        except Exception as e:
-            print(f"Erro ao carregar {arq}: {e}")
-            time.sleep(5)
-            clear()
-            return None
+    try:
+        for arq in arquivos:
+          caminho = os.path.join(CSV_DIR, arq)
+          nome_tabela = os.path.splitext(arq)[0]
+          con.execute(
+          f"CREATE OR REPLACE TEMP TABLE {nome_tabela} AS SELECT * FROM read_csv_auto('{caminho}')"
+          ) # Trollando (depois arrumo, lol)
+          print(f"[OK] Tabela carregada: {nome_tabela}")
+        return con
+    except Exception as e:
+        print(f"Erro ao carregar {arq}: {e}")
+        time.sleep(5)
+        clear()
+        return None
 
 def loop_interativo(con):
     clear()
