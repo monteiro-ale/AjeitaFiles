@@ -151,7 +151,7 @@ def loop_interativo(con):
     print("\nDigite queries SQL (\\exit para sair, \\tables para listar tabelas, \\export para exportar última consulta)\n")
     print("=" * 65)
     
-    last_df = None  # variável para guardar o último resultado
+    last_df = None 
     
     while True:
         query = input("SQL> ").strip()
@@ -179,7 +179,7 @@ def loop_interativo(con):
         elif query:
             try:
                 df = con.execute(query).df()
-                last_df = df  # salva como última consulta
+                last_df = df 
                 print(df.head(20).to_string(index=False))
             except Exception as e:
                 print(f"Erro: {e}")

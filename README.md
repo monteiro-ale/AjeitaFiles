@@ -7,7 +7,9 @@ Coisas pra lembrar de implementar no duckmode:
 
 - Rich ou tabulate pra printar result set's de um jeito decente.
 
-- Listagem automatica das tabelas persistidas em disco (funcao show_tables()) e dos arquivos csv da pasta csv -> daí sim pede opção in memory ou persistencia, no modo memory eu sou obrigado a escolher que arquivo(s) carregar e no modo persistencia perguntar se quer subir algum daqueles arquivos pro patodb.
+- Placeholders ASCII consistente para símbolos
+
+- Tratamento de erros e modularização maior
 
 - Uma tela mais maneira pro topo do modulo, com um dicionario de comandos
 
