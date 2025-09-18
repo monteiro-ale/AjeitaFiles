@@ -31,8 +31,9 @@ def pato_menu():
         importa_csv_banco(persistence)
         return
     elif e == "3":
-      print(">>Ainda não implementado")
-      time.sleep(3)
+      path = f"{BASE_DIR}"+"\\ajeitafiles.duckdb"
+      con = conectar_duckdb(path)
+      loop_interativo(con)
       return
     else:
         print("Opção inválida, digite apenas números")
@@ -59,14 +60,10 @@ def importa_csv_banco(persistence):
         else: return
       else: return #que tripa de codigo horrivel...
 
-
-def query_in_db():
-    pass
-
 def list_all(tables, files):
     if tables:
       try:
-        for i,t in enumerate(tables): print(f"{i} - {t}\n")
+        for t in (tables): print(f"- {t}\n")
       except: print("Erro ao listar tabelas do banco")
     if files:
         print("=" * 65)
@@ -87,6 +84,7 @@ def list_db_tables(con):
           print("="*65)
           print("💾 Tabelas já existentes no banco:".center(65))
           print("="*65)
+          print("\n")
         return [t[0] for t in tables]
     except Exception as e:
         print(f"Erro ao listar tabelas no banco.{e}")
@@ -103,7 +101,7 @@ def conectar_duckdb(db_path):
 
 def selecionar_arquivos(files):
     while True:
-        print("=" * 60)
+        print("=" * 65)
         print("📁 Selecione os arquivos CSV para carregar")
         print("🔢 Digite os números dos arquivos separados por vírgula")
         print("↩️ Digite \\exit para voltar ao menu anterior")
@@ -150,21 +148,38 @@ def carregar_arquivos(con, arquivos, persistence):
 def loop_interativo(con):
     clear()
     print("=" * 65)
-    print("\nDigite queries SQL (\\exit para sair, \\tables para listar tabelas)\n")
+    print("\nDigite queries SQL (\\exit para sair, \\tables para listar tabelas, \\export para exportar última consulta)\n")
     print("=" * 65)
+    
+    last_df = None  # variável para guardar o último resultado
+    
     while True:
-        query = input("SQL> ").strip().lower()
-        if query in ["\\exit", "exit", "quit"]:
+        query = input("SQL> ").strip()
+        
+        if query.lower() in ["\\exit", "exit", "quit"]:
             print("Saindo do módulo SQL...")
             break
-        elif query in ["\\tables", ".tables"]:
+
+        elif query.lower() in ["\\tables", ".tables"]:
             tabelas = con.execute("SHOW TABLES").fetchall()
             print("Tabelas carregadas:", [t[0] for t in tabelas])
+
+        elif query.lower().startswith("\\export"):
+            if last_df is None:
+                print("Nenhuma consulta para exportar ainda.")
+            else:
+                parts = query.split(maxsplit=1)
+                filename = f"{parts[1]}.csv" if len(parts) > 1 else "last_query.csv"
+                
+                path = f"{CSV_DIR}\\{filename}"
+                
+                last_df.to_csv(path, index=False)
+                print(f"Última consulta exportada para {path}")
+
         elif query:
             try:
                 df = con.execute(query).df()
+                last_df = df  # salva como última consulta
                 print(df.head(20).to_string(index=False))
             except Exception as e:
                 print(f"Erro: {e}")
-
-
