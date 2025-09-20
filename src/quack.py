@@ -2,6 +2,11 @@ import duckdb
 import os
 from src.config import CSV_DIR, BASE_DIR
 from src.utils import *
+from rich.console import Console
+from rich.table import Table
+
+console = Console()
+
 
 def pato_menu():
     clear()
@@ -145,14 +150,70 @@ def carregar_arquivos(con, arquivos, persistence):
           clear()
           return None
 
+# def loop_interativo(con):
+#     clear()
+#     print("=" * 65)
+#     print("\nDigite queries SQL (\\exit para sair, \\tables para listar tabelas, \\export para exportar última consulta)\n")
+#     print("=" * 65)
+    
+#     last_df = None 
+    
+#     while True:
+#         query = input("SQL> ").strip()
+        
+#         if query.lower() in ["\\exit", "exit", "quit"]:
+#             print("Saindo do módulo SQL...")
+#             break
+
+#         elif query.lower() in ["\\tables", ".tables"]:
+#             tabelas = con.execute("SHOW TABLES").fetchall()
+#             print("Tabelas carregadas:", [t[0] for t in tabelas])
+
+#         elif query.lower().startswith("\\export"): #pensando em qual usar
+#             if last_df is None:
+#                 print("Nenhuma consulta para exportar ainda.")
+#             else:
+#                 parts = query.split(maxsplit=1)
+#                 filename = f"{parts[1]}.csv" if len(parts) > 1 else "last_query.csv"
+                
+#                 path = f"{CSV_DIR}\\{filename}"
+                
+#                 last_df.to_csv(path, index=False)
+#                 print(f"Última consulta exportada para {path}")
+
+#         elif query:
+#             try:
+#                 df = con.execute(query).df()
+#                 last_df = df 
+
+#                 table = Table(show_header=True, header_style="bold magenta")
+#                 for col in df.columns:
+#                     table.add_column(str(col))
+#                 for _, row in df.head(20).iterrows():
+#                     table.add_row(*[str(x) for x in row.values])
+#                 console.print(table)
+
+#             except Exception as e:
+#                 print(f"Erro: {e}")
+
+from rich.console import Console
+from rich.table import Table
+from rich import box
+import math
+
+console = Console()
+
 def loop_interativo(con):
     clear()
     print("=" * 65)
     print("\nDigite queries SQL (\\exit para sair, \\tables para listar tabelas, \\export para exportar última consulta)\n")
+    print("Use \\next e \\prev para navegar em resultados grandes.\n")
     print("=" * 65)
     
-    last_df = None 
-    
+    last_df = None
+    current_page = 0
+    page_size = 20
+
     while True:
         query = input("SQL> ").strip()
         
@@ -170,16 +231,52 @@ def loop_interativo(con):
             else:
                 parts = query.split(maxsplit=1)
                 filename = f"{parts[1]}.csv" if len(parts) > 1 else "last_query.csv"
-                
                 path = f"{CSV_DIR}\\{filename}"
-                
                 last_df.to_csv(path, index=False)
                 print(f"Última consulta exportada para {path}")
+
+        elif query.lower() == "\\next":
+            if last_df is not None:
+                total_pages = math.ceil(len(last_df) / page_size)
+                if current_page < total_pages - 1:
+                    current_page += 1
+                    print_page(last_df, current_page, page_size)
+                else:
+                    print("⚠️ Já está na última página.")
+            else:
+                print("Nenhum resultado carregado ainda.")
+
+        elif query.lower() == "\\prev":
+            if last_df is not None:
+                if current_page > 0:
+                    current_page -= 1
+                    print_page(last_df, current_page, page_size)
+                else:
+                    print("⚠️ Já está na primeira página.")
+            else:
+                print("Nenhum resultado carregado ainda.")
 
         elif query:
             try:
                 df = con.execute(query).df()
-                last_df = df 
-                print(df.head(20).to_string(index=False))
+                last_df = df
+                current_page = 0
+                print_page(last_df, current_page, page_size)
             except Exception as e:
                 print(f"Erro: {e}")
+
+
+def print_page(df, page, page_size=20):
+    start = page * page_size
+    end = start + page_size
+    subset = df.iloc[start:end]
+#table = Table(show_header=True, header_style="bold magenta", show_lines=True, box=box.SIMPLE_HEAVY)
+    table = Table(show_header=True, header_style="bold magenta")
+    for col in subset.columns:
+        table.add_column(str(col), overflow="fold")
+
+    for _, row in subset.iterrows():
+        table.add_row(*[str(val) if val is not None else "" for val in row.values])
+
+    console.print(table)
+    print(f"\n📊 Mostrando linhas {start+1}–{min(end, len(df))} de {len(df)} (página {page+1}/{math.ceil(len(df)/page_size)})\n")
