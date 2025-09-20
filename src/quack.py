@@ -4,6 +4,8 @@ from src.config import CSV_DIR, BASE_DIR
 from src.utils import *
 from rich.console import Console
 from rich.table import Table
+from rich import box
+import math
 
 console = Console()
 
@@ -150,59 +152,6 @@ def carregar_arquivos(con, arquivos, persistence):
           clear()
           return None
 
-# def loop_interativo(con):
-#     clear()
-#     print("=" * 65)
-#     print("\nDigite queries SQL (\\exit para sair, \\tables para listar tabelas, \\export para exportar última consulta)\n")
-#     print("=" * 65)
-    
-#     last_df = None 
-    
-#     while True:
-#         query = input("SQL> ").strip()
-        
-#         if query.lower() in ["\\exit", "exit", "quit"]:
-#             print("Saindo do módulo SQL...")
-#             break
-
-#         elif query.lower() in ["\\tables", ".tables"]:
-#             tabelas = con.execute("SHOW TABLES").fetchall()
-#             print("Tabelas carregadas:", [t[0] for t in tabelas])
-
-#         elif query.lower().startswith("\\export"): #pensando em qual usar
-#             if last_df is None:
-#                 print("Nenhuma consulta para exportar ainda.")
-#             else:
-#                 parts = query.split(maxsplit=1)
-#                 filename = f"{parts[1]}.csv" if len(parts) > 1 else "last_query.csv"
-                
-#                 path = f"{CSV_DIR}\\{filename}"
-                
-#                 last_df.to_csv(path, index=False)
-#                 print(f"Última consulta exportada para {path}")
-
-#         elif query:
-#             try:
-#                 df = con.execute(query).df()
-#                 last_df = df 
-
-#                 table = Table(show_header=True, header_style="bold magenta")
-#                 for col in df.columns:
-#                     table.add_column(str(col))
-#                 for _, row in df.head(20).iterrows():
-#                     table.add_row(*[str(x) for x in row.values])
-#                 console.print(table)
-
-#             except Exception as e:
-#                 print(f"Erro: {e}")
-
-from rich.console import Console
-from rich.table import Table
-from rich import box
-import math
-
-console = Console()
-
 def loop_interativo(con):
     clear()
     print("=" * 65)
@@ -264,7 +213,6 @@ def loop_interativo(con):
                 print_page(last_df, current_page, page_size)
             except Exception as e:
                 print(f"Erro: {e}")
-
 
 def print_page(df, page, page_size=20):
     start = page * page_size
