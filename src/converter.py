@@ -86,13 +86,17 @@ def escolha_valida(files, escolha):
     title = "Informações sobre o arquivo"
     original_encoding = detecta_encoding(input_path)
     if original_encoding == None:
+       print("Erro ao detectar encoding!")
        return
     else:
+      clear()
       print("=" * largura)
       print(title.center(largura))
       print(f"\nNome do Arquivo → {arquivo_selecionado}\n")
+      print("=" * largura)
       encoding_info(original_encoding)
       print("=" * largura)
+      print("Digite ENTER para converter para o melhor encoding (utf-8 obviamente).")
       target_encoding = input("Digite o encoding de saída (ex: utf-8, latin1, cp1252): ").strip() or "utf-8"
       base_name = os.path.splitext(arquivo_selecionado)[0]
       output_file = f"{base_name}_{target_encoding}.csv"
