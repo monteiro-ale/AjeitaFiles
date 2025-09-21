@@ -82,12 +82,17 @@ def detecta_encoding(input_path, sample_size=100000):
 def escolha_valida(files, escolha):
     arquivo_selecionado = files[int(escolha)-1]
     input_path = os.path.join(CSV_DIR, arquivo_selecionado)
+    largura = 65
+    title = "Informações sobre o arquivo"
     original_encoding = detecta_encoding(input_path)
     if original_encoding == None:
        return
     else:
+      print("=" * largura)
+      print(title.center(largura))
+      print(f"\nNome do Arquivo → {arquivo_selecionado}\n")
       encoding_info(original_encoding)
-      print(f"\nNome do Arquivo: {arquivo_selecionado}\n")
+      print("=" * largura)
       target_encoding = input("Digite o encoding de saída (ex: utf-8, latin1, cp1252): ").strip() or "utf-8"
       base_name = os.path.splitext(arquivo_selecionado)[0]
       output_file = f"{base_name}_{target_encoding}.csv"
@@ -104,7 +109,7 @@ def encoding_info(original_encoding):
     "utf-16": "UTF-16 (Unicode em 2 bytes; comum em arquivos do Windows e Excel, precisa de BOM para indicar ordem)",
     }
    info = familias.get(original_encoding.lower(), "Não tenho mais infos pra este encoding D:")
-   return print(f"Encoding detectado: {original_encoding} Infos → {info}")
+   return print(f"Encoding detectado: {original_encoding}\nInfos → {info}")
 
 def exec_convert_encoding():
     files = list_csv_files()
