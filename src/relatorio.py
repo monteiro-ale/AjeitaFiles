@@ -75,14 +75,24 @@ def diagnostico_duckdb(filepath, table_name="tabela"):
         SELECT * FROM read_csv_auto('{str(filepath)}', header=True, SAMPLE_SIZE=-1)
     """)
     console.print(f"📂 Arquivo [bold]{filepath}[/bold] carregado com sucesso!\n", style="green")
+    printa_diagnostico(con, table_name)
 
+def printa_diagnostico(con, table_name):
+    cols = count_lines_and_columns(con, table_name)
+    constant_columns(con,cols, table_name)
+    column_cardinality(con, cols, table_name)
+    column_null(con, cols, table_name)
+
+
+def count_lines_and_columns(con, table_name):
     # Número de linhas e colunas
     shape = con.execute(f"SELECT COUNT(*) AS linhas FROM {table_name}").fetchone()[0]
     cols = con.execute(f"PRAGMA table_info({table_name})").fetchall()
     console.print(f"Linhas: [bold]{shape:,}[/bold]")
     console.print(f"Colunas: [bold]{len(cols)}[/bold]\n")
+    return cols
 
-    # Colunas constantes
+def constant_columns(con, cols, table_name):  
     constantes = []
     for c in cols:
         col = c[1]
@@ -102,7 +112,7 @@ def diagnostico_duckdb(filepath, table_name="tabela"):
     console.print("📌 Pressione [bold green]ENTER[/bold green] para continuar para a próxima seção...", style="yellow")
     input()
 
-    # Cardinalidade por coluna
+def column_cardinality(con, cols, table_name):
     table_card = Table(title="🔹 Cardinalidade (nº de valores únicos por coluna)", show_lines=True)
     table_card.add_column("Coluna", style="magenta")
     table_card.add_column("Valores únicos", justify="right", style="yellow")
@@ -115,7 +125,7 @@ def diagnostico_duckdb(filepath, table_name="tabela"):
     console.print("📌 Pressione [bold green]ENTER[/bold green] para continuar para a próxima seção...", style="yellow")
     input()
 
-    # Valores nulos por coluna
+def column_null(con, cols, table_name):    # Valores nulos por coluna
     table_null = Table(title="🔹 Valores nulos por coluna", show_lines=True)
     table_null.add_column("Coluna", style="red")
     table_null.add_column("Nulos", justify="right", style="bright_red")
@@ -131,3 +141,9 @@ def diagnostico_duckdb(filepath, table_name="tabela"):
     time.sleep(10)
     con.close()
 
+
+
+
+#Se quiser que zero e vazio sejam considerados diferentes (colunas constantes).
+#SELECT COUNT(DISTINCT COALESCE(CAST(COL1 AS VARCHAR), 'NULL_REPLACEMENT')) 
+#FROM tabela;
