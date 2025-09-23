@@ -84,7 +84,7 @@ def printa_diagnostico(con, table_name):
     column_cardinality(con, cols, table_name)
     column_null(con, cols, table_name)
 
-def input_keys(con, cols, table_name):
+#def input_keys1(con, cols, table_name):
     colnames = [c[1] for c in cols]
     console.print("🔑 Informe as colunas-chave para verificar duplicidade")
     console.print("   - Digite os nomes separados por vírgula (ex: ID,EMAIL)")
@@ -110,6 +110,48 @@ def input_keys(con, cols, table_name):
                 )
             """).fetchone()[0]
             table_dupes.add_row(f"Linhas duplicadas: {dupes:,} (Chaves: {', '.join(keys)})")
+    else:
+        table_dupes.add_row("Linhas duplicadas: 0 (Colunas-chave não informadas)")
+
+    console.print(table_dupes)
+    console.print()
+    console.print("📌 Pressione [bold green]ENTER[/bold green] para continuar...", style="yellow")
+    input()
+
+def input_keys(con, cols, table_name):
+    colnames = [c[1] for c in cols]
+    console.print("🔑 Informe as colunas-chave para verificar duplicidade")
+    console.print("   - Digite os nomes separados por vírgula (ex: ID,EMAIL)")
+    console.print("   - Pressione ENTER para pular\n", style="yellow")
+    key_input = input("> ").strip()
+
+    table_dupes = Table(title="🔹 Duplicidade", show_lines=True)
+    table_dupes.add_column("Resultado", style="bold cyan")
+
+    if key_input:
+        keys = [k.strip() for k in key_input.split(",") if k.strip() in colnames]
+        if not keys:
+            table_dupes.add_row("⚠️ Nenhuma chave válida informada")
+        else:
+            keys_str = ", ".join([f'"{k}"' for k in keys])
+            row = con.execute(f"""
+                SELECT
+                  SUM(cnt) AS total_duplicadas,
+                  SUM(cnt - 1) AS excedentes
+                FROM (
+                    SELECT COUNT(*) AS cnt
+                    FROM {table_name}
+                    GROUP BY {keys_str}
+                    HAVING COUNT(*) > 1
+                )
+            """).fetchone()
+
+            total_duplicadas, excedentes = row if row else (0, 0)
+            total_duplicadas = total_duplicadas or 0
+            excedentes = excedentes or 0
+
+            table_dupes.add_row(f"Linhas duplicadas (todas): {total_duplicadas:,} (Chaves: {', '.join(keys)})")
+            table_dupes.add_row(f"Linhas excedentes (rejeitadas): {excedentes:,} (Chaves: {', '.join(keys)})")
     else:
         table_dupes.add_row("Linhas duplicadas: 0 (Colunas-chave não informadas)")
 
@@ -172,7 +214,7 @@ def column_null(con, cols, table_name):    # Valores nulos por coluna
     console.print("📌 Pressione [bold green]ENTER[/bold green] para continuar para a próxima seção...", style="yellow")
     input()
 
-    time.sleep(10)
+    time.sleep(5)
     con.close()
 
 
