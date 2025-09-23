@@ -133,7 +133,10 @@ def input_keys(con, cols, table_name):
         if not keys:
             table_dupes.add_row("⚠️ Nenhuma chave válida informada")
         else:
-            keys_str = ", ".join([f'"{k}"' for k in keys])
+            keys_str = ", ".join([
+              f"COALESCE(NULLIF(TRIM(CAST(\"{k}\" AS VARCHAR)), ''), '∅')" 
+              for k in keys
+            ])
             row = con.execute(f"""
                 SELECT
                   SUM(cnt) AS total_duplicadas,
