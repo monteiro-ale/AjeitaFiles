@@ -1,6 +1,10 @@
 import duckdb
 from src.config import *
 from src.utils import *
+import time
+from rich.console import Console
+from rich.table import Table
+console = Console()
 
 
 def relatorio_menu():
@@ -71,58 +75,8 @@ def exec_relatorio(selected):
         diagnostico_duckdb(filepath, table_name)
 
 
-# def diagnostico_duckdb(filepath, table_name="tabela"):
-#     con = duckdb.connect()
 
-#       # Carrega o CSV como uma tabela
-#     con.execute(f"""
-#         CREATE OR REPLACE TABLE {table_name} AS 
-#         SELECT * FROM read_csv_auto('{filepath}', header=True, SAMPLE_SIZE=-1)
-#     """)
-
-#     print("📂 Arquivo carregado com sucesso!\n")
-
-#     # Número de linhas e colunas
-#     shape = con.execute(f"SELECT COUNT(*) AS linhas FROM {table_name}").fetchone()[0]
-#     cols = con.execute(f"PRAGMA table_info({table_name})").fetchall()
-#     print(f"Linhas: {shape:,}")
-#     print(f"Colunas: {len(cols)}\n")
-
-#     # Colunas constantes
-#     print("🔹 Colunas constantes (mesmo valor em 100% das linhas):")
-#     const_cols = con.execute(f"""
-#         SELECT column_name, COUNT(DISTINCT {table_name}.column_name) AS distincts
-#         FROM pragma_table_info('{table_name}') 
-#         JOIN {table_name} ON TRUE
-#         GROUP BY column_name
-#         HAVING distincts = 1
-#     """).fetchall()
-#     if const_cols:
-#         for c in const_cols:
-#           print(f" - {c[0]}")
-#     else:
-#         print("Nenhuma coluna constante encontrada.")
-#     print()
-
-#     # Cardinalidade por coluna
-#     print("🔹 Cardinalidade (nº de valores únicos por coluna):")
-#     for c in cols:
-#         col = c[1]
-#         nuniq = con.execute(f"SELECT COUNT(DISTINCT {col}) FROM {table_name}").fetchone()[0]
-#         print(f" - {col}: {nuniq:,}")
-#     print()
-
-#     # Valores nulos por coluna
-#     print("🔹 Nulos por coluna:")
-#     for c in cols:
-#         col = c[1]
-#         nnulos = con.execute(f"SELECT COUNT(*) FROM {table_name} WHERE {col} IS NULL").fetchone()[0]
-#         print(f" - {col}: {nnulos:,}")
-#     print()
-
-#     con.close()
-
-def diagnostico_duckdb(filepath, table_name="tabela"):
+def diagnostico_duckdb2(filepath, table_name="tabela"):
     con = duckdb.connect()
 
     # Carrega o CSV como uma tabela
@@ -175,3 +129,61 @@ def diagnostico_duckdb(filepath, table_name="tabela"):
     con.close()
 
 
+def diagnostico_duckdb(filepath, table_name="tabela"):
+    con = duckdb.connect()
+
+    # Carrega o CSV como uma tabela
+    con.execute(f"""
+        CREATE OR REPLACE TABLE {table_name} AS 
+        SELECT * FROM read_csv_auto('{str(filepath)}', header=True, SAMPLE_SIZE=-1)
+    """)
+    console.print(f"📂 Arquivo [bold]{filepath}[/bold] carregado com sucesso!\n", style="green")
+
+    # Número de linhas e colunas
+    shape = con.execute(f"SELECT COUNT(*) AS linhas FROM {table_name}").fetchone()[0]
+    cols = con.execute(f"PRAGMA table_info({table_name})").fetchall()
+    console.print(f"Linhas: [bold]{shape:,}[/bold]")
+    console.print(f"Colunas: [bold]{len(cols)}[/bold]\n")
+
+    # Colunas constantes
+    constantes = []
+    for c in cols:
+        col = c[1]
+        distincts = con.execute(f'SELECT COUNT(DISTINCT "{col}") FROM "{table_name}"').fetchone()[0]
+        if distincts == 1:
+            constantes.append(col)
+
+    table_const = Table(title="🔹 Colunas constantes", show_lines=True)
+    table_const.add_column("Coluna", style="cyan")
+    if constantes:
+        for col in constantes:
+            table_const.add_row(col)
+    else:
+        table_const.add_row("Nenhuma coluna constante encontrada")
+    console.print(table_const)
+    console.print()
+
+    # Cardinalidade por coluna
+    table_card = Table(title="🔹 Cardinalidade (nº de valores únicos por coluna)", show_lines=True)
+    table_card.add_column("Coluna", style="magenta")
+    table_card.add_column("Valores únicos", justify="right", style="yellow")
+    for c in cols:
+        col = c[1]
+        nuniq = con.execute(f'SELECT COUNT(DISTINCT "{col}") FROM "{table_name}"').fetchone()[0]
+        table_card.add_row(col, f"{nuniq:,}")
+    console.print(table_card)
+    console.print()
+
+    # Valores nulos por coluna
+    table_null = Table(title="🔹 Valores nulos por coluna", show_lines=True)
+    table_null.add_column("Coluna", style="red")
+    table_null.add_column("Nulos", justify="right", style="bright_red")
+    for c in cols:
+        col = c[1]
+        nnulos = con.execute(f'SELECT COUNT(*) FROM "{table_name}" WHERE "{col}" IS NULL').fetchone()[0]
+        table_null.add_row(col, f"{nnulos:,}")
+    console.print(table_null)
+    console.print()
+
+    time.sleep(20)
+    con.close()
