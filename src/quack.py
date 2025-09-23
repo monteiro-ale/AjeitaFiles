@@ -142,8 +142,8 @@ def carregar_arquivos(con, arquivos, persistence):
             caminho = os.path.join(CSV_DIR, arq)
             nome_tabela = os.path.splitext(arq)[0]
             con.execute(
-            f"{query} {nome_tabela} AS SELECT * FROM read_csv_auto('{caminho}')"
-            ) # Trollando (depois arrumo, lol)
+            f"""{query} {nome_tabela} AS SELECT * FROM read_csv_auto('{caminho}', sample_size=-1)"""
+            )
             print(f"[OK] Tabela carregada: {nome_tabela}")
           return con
       except Exception as e:

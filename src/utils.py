@@ -61,7 +61,8 @@ def importar_para_banco(con, arquivos):
         caminho = os.path.join(CSV_DIR, arq)
         nome_tabela = os.path.splitext(arq)[0]
         try:
-            con.execute(f"CREATE TABLE {nome_tabela} AS SELECT * FROM read_csv_auto('{caminho}')")
+            query = f"""CREATE TABLE {nome_tabela} AS SELECT * FROM read_csv_auto('{caminho}', sample_size=-1)"""
+            con.execute(query)
             print(f"[OK] Tabela persistida: {nome_tabela}")
         except Exception as e:
             print(f"Erro ao importar {arq}: {e}")
@@ -72,7 +73,8 @@ def carregar_in_memory(con, arquivos):
         caminho = os.path.join(CSV_DIR, arq)
         alias = f"t{idx}"
         try:
-            con.execute(f"CREATE TEMP TABLE {alias} AS SELECT * FROM read_csv_auto('{caminho}')")
+            query = f"""CREATE TEMP TABLE {alias} AS SELECT * FROM read_csv_auto('{caminho}', sample_size=-1)"""
+            con.execute(query)
             aliases[alias] = arq
             print(f"[TEMP] {arq} carregado como {alias}")
         except Exception as e:

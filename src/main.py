@@ -5,6 +5,7 @@ from src import converter
 from src import quack
 from src import splitter
 from src import utils
+from src import testerelatorio2
 
 def main_menu():
     while True:
@@ -30,7 +31,8 @@ def main_menu():
             os.system("cls")
             converter.convert_menu()
         elif opcao == "2":
-            print("\n>> [Relatório de Arquivo ainda não implementado]")
+            #print("\n>> [Relatório de Arquivo ainda não implementado]")
+            testerelatorio2.relatorio_menu()
             time.sleep(1)
             os.system("cls")
         elif opcao == "3":
