@@ -97,9 +97,9 @@ def escolha_valida(files, escolha):
       encoding_info(original_encoding)
       print("=" * largura)
       print("Digite ENTER para converter para o melhor encoding (utf-8 obviamente).")
-      target_encoding = input("Digite o encoding de saída (ex: utf-8, latin1, cp1252): ").strip() or "utf-8"
+      target_encoding = input("Digite o encoding de saída (ex: utf-8, latin1, cp1252): ").strip() or "utf_8"
       base_name = os.path.splitext(arquivo_selecionado)[0]
-      output_file = f"{base_name}_{target_encoding}.csv"
+      output_file = f"{base_name}_{target_encoding.replace("-","_")}.csv"
       output_path = os.path.join(CSV_DIR, output_file)
       convert_csv_encoding(input_path, output_path, target_encoding)
       time.sleep(2)
