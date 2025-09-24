@@ -5,38 +5,37 @@ import chardet
 from src.config import XLSX_DIR, CSV_DIR, BASE_DIR
 from src.utils import *
 
-
 def convert_menu():
     while True:
-      clear()
-      largura = 65
-      print("=" * largura)
-      print("🔄 MÓDULO DE CONVERSÃO 🔄".center(largura))
-      print("=" * largura)
-      print("Selecione o tipo de conversão:\n".center(largura))
-      print("0 - Voltar".ljust(largura))
-      print("1 - Converter XLSX para CSV".ljust(largura))
-      print("2 - Converter encoding de arquivo CSV".ljust(largura))
-      print("=" * largura)
+        clear()
+        largura = 65
+        print("=" * largura)
+        print("🔄 MÓDULO DE CONVERSÃO 🔄".center(largura))
+        print("=" * largura)
+        print("Selecione o tipo de conversão:\n".center(largura))
+        print("0 - Voltar".ljust(largura))
+        print("1 - Converter XLSX para CSV".ljust(largura))
+        print("2 - Converter encoding de arquivo CSV".ljust(largura))
+        print("=" * largura)
 
 
-      opcao = input("Escolha uma opção: ")
+        opcao = input("Escolha uma opção: ")
 
-      if opcao == "0":
-          clear()
-          return
-      elif opcao == "1":
-        exec_convert_format()
-        clear()
-      elif opcao == "2":
-        exec_convert_encoding()
-        clear()
-      else: 
-        print("⚠️ Opção inválida, tente novamente!")
-        time.sleep(1)
-        clear()
- 
-def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"):   
+        if opcao == "0":
+            clear()
+            return
+        elif opcao == "1":
+            exec_convert_format()
+            clear()
+        elif opcao == "2":
+            exec_convert_encoding()
+            clear()
+        else: 
+            print("⚠️ Opção inválida, tente novamente!")
+            time.sleep(1)
+            clear()
+
+def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"): 
     try:
         xls = pd.ExcelFile(input_path)
         for sheet_name in xls.sheet_names:
@@ -55,33 +54,41 @@ def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"):
         time.sleep(8)
         return
 
-def convert_csv_encoding(input_path, output_path):
+def convert_csv_encoding(input_path, output_path, detected_encoding):
     try:
-        df = pd.read_csv(input_path, encoding="utf-8", low_memory=False)
-        df.to_csv(output_path, index=False, encoding="utf-8")
-        print(f"✅ Arquivo convertido para utf-8: {output_path}")
+        # Lê o arquivo com o encoding detectado
+        with open(input_path, 'r', encoding=detected_encoding, errors='replace') as f_entrada:
+            conteudo = f_entrada.read()
+        
+        with open(output_path, 'w', encoding='utf-8', newline="") as f_saida:
+            f_saida.write(conteudo)
+        
+        print(f"✅ Arquivo convertido para UTF-8: {output_path}")
+        return True
+        
     except Exception as e:
         print(f"❌ Erro ao converter: {e}")
         time.sleep(5)
-        return
+        return False
+
 
 def detecta_encoding(input_path, sample_size=100000):
-   try:
-    with open(input_path, "rb") as f:
-      raw_data = f.read(sample_size)
-      result = chardet.detect(raw_data)
-      encoding = result.get("encoding")
-      confidence = result.get("confidence", 0)
+    try:
+        with open(input_path, "rb") as f:
+            raw_data = f.read(sample_size)
+            result = chardet.detect(raw_data)
+            encoding = result.get("encoding")
+            confidence = result.get("confidence", 0)
 
-    if encoding and confidence > 0.5:
-      return encoding
-    else:
-      return None
-   except Exception as e:
-    print(f"❌ Erro ao detectar encoding: {e}")
-    print("Voltando ao menu anterior...")
-    time.sleep(2)
-    return None
+        if encoding and confidence > 0.5:
+            return encoding
+        else:
+            return None
+    except Exception as e:
+        print(f"❌ Erro ao detectar encoding: {e}")
+        print("Voltando ao menu anterior...")
+        time.sleep(2)
+        return None
 
 def escolha_valida(files, escolha):
     arquivo_selecionado = files[int(escolha)-1]
@@ -89,34 +96,37 @@ def escolha_valida(files, escolha):
     largura = 65
     title = "Informações sobre o arquivo"
     original_encoding = detecta_encoding(input_path)
-    if original_encoding == None:
-       print("Erro ao detectar encoding!")
-       return
+    
+    if not original_encoding:
+        print("Erro ao detectar encoding!")
+        return
     else:
-      clear()
-      print("=" * largura)
-      print(title.center(largura))
-      print(f"\nNome do Arquivo → {arquivo_selecionado}\n")
-      print("=" * largura)
-      encoding_info(original_encoding)
-      print("=" * largura)
-      target_encoding = "UTF8"
-      base_name = os.path.splitext(arquivo_selecionado)[0]
-      output_file = f"{base_name}_{target_encoding}.csv"
-      output_path = os.path.join(CSV_DIR, output_file)
-      convert_csv_encoding(input_path, output_path)
-      time.sleep(2)
+        clear()
+        print("=" * largura)
+        print(title.center(largura))
+        print(f"\nNome do Arquivo → {arquivo_selecionado}\n")
+        print("=" * largura)
+        encoding_info(original_encoding)
+        print("=" * largura)
+
+        target_encoding = "UTF8"
+        base_name = os.path.splitext(arquivo_selecionado)[0]
+        output_file = f"{base_name}_{target_encoding}.csv"
+        output_path = os.path.join(CSV_DIR, output_file)
+
+        convert_csv_encoding(input_path, output_path, original_encoding)
+        time.sleep(2)
 
 def encoding_info(original_encoding):
-   familias = {
+    familias = {
     "ascii": "ASCII (básico: apenas inglês, compatível com quase todos os outros encodings)",
     "utf-8": "UTF-8 (universal: suporta todos os caracteres Unicode; inclui ASCII)",
     "latin-1": "Latin1 / ISO-8859-1 (idiomas da Europa Ocidental; próximo ao Windows-1252)",
     "windows-1252": "Windows-1252 (variação do Latin1 usada no Windows; traz símbolos extras como €, ™, —)",
     "utf-16": "UTF-16 (Unicode em 2 bytes; comum em arquivos do Windows e Excel, precisa de BOM para indicar ordem)",
     }
-   info = familias.get(original_encoding.lower(), "Não tenho mais infos pra este encoding D:")
-   return print(f"Encoding detectado: {original_encoding}\nInfos → {info}")
+    info = familias.get(original_encoding.lower(), "Não tenho mais infos pra este encoding D:")
+    return print(f"Encoding detectado: {original_encoding}\nInfos → {info}")
 
 def exec_convert_encoding():
     files = list_csv_files()
@@ -199,4 +209,3 @@ def exec_convert_format():
         print("=" * largura)
         time.sleep(1)
         return
-
