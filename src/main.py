@@ -7,7 +7,7 @@ from rich.panel import Panel
 from rich.align import Align
 from rich import box
 
-from src import converter2
+from src import converter
 from src import quack
 from src import splitter
 from src import utils
@@ -55,7 +55,7 @@ def main_menu():
             os.system("cls" if os.name == "nt" else "clear")
             break
         elif opcao == "1":
-            converter2.convert_menu()
+            converter.convert_menu()
         elif opcao == "2":
             relatorio.relatorio_menu()
             time.sleep(1)
