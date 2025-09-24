@@ -7,14 +7,16 @@ from src.utils import *
 
 def convert_menu():
     while True:
-      print("=" * 38)
-      print("-----------MODULO CONVERSAO-----------")
-      print("=" * 38)
-      print("Selecione o tipo de conversão:\n")
-      print("0 - Voltar")
-      print("1 - Converter xlsx para csv")
-      print("2 - Converter encoding de arquivo csv")
-      print("=" * 38)
+      largura = 65
+      print("=" * largura)
+      print("🔄 MÓDULO DE CONVERSÃO 🔄".center(largura))
+      print("=" * largura)
+      print("Selecione o tipo de conversão:\n".center(largura))
+      print("0 - Voltar".ljust(largura))
+      print("1 - Converter XLSX para CSV".ljust(largura))
+      print("2 - Converter encoding de arquivo CSV".ljust(largura))
+      print("=" * largura)
+
 
       opcao = input("Escolha uma opção: ")
 
@@ -118,42 +120,80 @@ def encoding_info(original_encoding):
 def exec_convert_encoding():
     files = list_csv_files()
     clear()
-    print("=" * 38)
-    for idx, f in enumerate(files, start=1): 
-      print(f"{idx} - {f}")
-    print("=" * 38)
+    largura = 65
 
+    if not files:
+        print("=" * largura)
+        print("⚠️  Nenhum arquivo CSV encontrado!".center(largura))
+        print("=" * largura)
+        time.sleep(1.5)
+        return
+
+    print("=" * largura)
+    print("🌐 CONVERSÃO DE ENCODING DE CSV 🌐".center(largura))
+    print("=" * largura)
+
+    for idx, f in enumerate(files, start=1):
+        print(f"{idx} 📄 {f}".ljust(largura))
+
+    print("=" * largura)
     escolha = input("Escolha o arquivo para converter (ou 0 para voltar): ")
 
     if escolha == "0":
-      return
+        return
+
     elif escolha.isdigit() and 1 <= int(escolha) <= len(files):
-      escolha_valida(files, escolha)
+        escolha_valida(files, escolha)
+        print("\n✅ Conversão concluída com sucesso!")
+        time.sleep(1.5)
+
     else:
-      print("⚠️ Opção inválida, tente novamente!")
-      time.sleep(1)    
+        print("=" * largura)
+        print("⚠️  Opção inválida, tente novamente!".center(largura))
+        print("=" * largura)
+        time.sleep(1)
+        return 
 
 def exec_convert_format():
     files = list_xlsx_files()
     clear()
-    print("=" * 38)
-    for idx, f in enumerate(files, start=1):
-      print(f"{idx} - {f}")
-    print("=" * 38)
+    largura = 65
 
+    if not files:
+        print("=" * largura)
+        print("⚠️  Nenhum arquivo XLSX encontrado!".center(largura))
+        print("=" * largura)
+        time.sleep(1.5)
+        return
+
+    print("=" * largura)
+    print("📈 ARQUIVOS XLSX DISPONÍVEIS 📈".center(largura))
+    print("=" * largura)
+
+    for idx, f in enumerate(files, start=1):
+        print(f"{idx} 📑 {f}".ljust(largura))
+
+    print("=" * largura)
     opcao = input("Escolha o arquivo para converter (ou 0 para voltar): ")
+
     if opcao == "0":
-      return
+        return
+
     elif opcao.isdigit() and 1 <= int(opcao) <= len(files):
-      arquivo_selecionado = files[int(opcao)-1]
-      input_path = os.path.join(XLSX_DIR, arquivo_selecionado)
-      output_file = os.path.splitext(arquivo_selecionado)[0] + ".csv"
-      output_path = CSV_DIR
-      convert_xlsx_to_csv(input_path, output_path)
-      time.sleep(1.5)
+        arquivo_selecionado = files[int(opcao) - 1]
+
+        input_path = XLSX_DIR / arquivo_selecionado
+        output_file = Path(arquivo_selecionado).stem + ".csv"
+        output_path = CSV_DIR / output_file
+
+        convert_xlsx_to_csv(input_path, output_path)
+        print(f"\n✅ Arquivo convertido com sucesso: {output_file}")
+        time.sleep(1.5)
+
     else:
-      print("=" * 38)
-      print("\n⚠️ Opção inválida, tente novamente!")
-      time.sleep(1)
-      return
+        print("=" * largura)
+        print("⚠️  Opção inválida, tente novamente!".center(largura))
+        print("=" * largura)
+        time.sleep(1)
+        return
 
