@@ -5,8 +5,10 @@ import chardet
 from src.config import XLSX_DIR, CSV_DIR, BASE_DIR
 from src.utils import *
 
+
 def convert_menu():
     while True:
+      clear()
       largura = 65
       print("=" * largura)
       print("🔄 MÓDULO DE CONVERSÃO 🔄".center(largura))
@@ -53,11 +55,11 @@ def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"):
         time.sleep(8)
         return
 
-def convert_csv_encoding(input_path, output_path, target_encoding="utf-8"):
+def convert_csv_encoding(input_path, output_path):
     try:
         df = pd.read_csv(input_path, encoding="utf-8", low_memory=False)
-        df.to_csv(output_path, index=False, encoding=target_encoding)
-        print(f"✅ Arquivo convertido para {target_encoding}: {output_path}")
+        df.to_csv(output_path, index=False, encoding="utf-8")
+        print(f"✅ Arquivo convertido para utf-8: {output_path}")
     except Exception as e:
         print(f"❌ Erro ao converter: {e}")
         time.sleep(5)
@@ -98,12 +100,11 @@ def escolha_valida(files, escolha):
       print("=" * largura)
       encoding_info(original_encoding)
       print("=" * largura)
-      print("Digite ENTER para converter para o melhor encoding (utf-8 obviamente).")
-      target_encoding = input("Digite o encoding de saída (ex: utf-8, latin1, cp1252): ").strip() or "utf_8"
+      target_encoding = "UTF8"
       base_name = os.path.splitext(arquivo_selecionado)[0]
-      output_file = f"{base_name}_{target_encoding.replace("-","_")}.csv"
+      output_file = f"{base_name}_{target_encoding}.csv"
       output_path = os.path.join(CSV_DIR, output_file)
-      convert_csv_encoding(input_path, output_path, target_encoding)
+      convert_csv_encoding(input_path, output_path)
       time.sleep(2)
 
 def encoding_info(original_encoding):
@@ -132,6 +133,8 @@ def exec_convert_encoding():
     print("=" * largura)
     print("🌐 CONVERSÃO DE ENCODING DE CSV 🌐".center(largura))
     print("=" * largura)
+    print("⚠️ Atualmente só posso converter pra UTF-8 ⚠️".center(largura))
+    print()
 
     for idx, f in enumerate(files, start=1):
         print(f"{idx} 📄 {f}".ljust(largura))
@@ -145,7 +148,7 @@ def exec_convert_encoding():
     elif escolha.isdigit() and 1 <= int(escolha) <= len(files):
         escolha_valida(files, escolha)
         print("\n✅ Conversão concluída com sucesso!")
-        time.sleep(1.5)
+        time.sleep(1)
 
     else:
         print("=" * largura)
@@ -196,4 +199,5 @@ def exec_convert_format():
         print("=" * largura)
         time.sleep(1)
         return
+
 
