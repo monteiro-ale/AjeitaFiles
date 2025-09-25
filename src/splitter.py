@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 from pathlib import Path
+import csv
+import time
 from src.utils import *
 from src.config import *
 
@@ -24,7 +26,6 @@ def split_menu():
         split_csv(selected, chunk)
             
 
-
 def set_chunk():
     while True:
         print("\nDefina a quantidade de linhas por arquivo")
@@ -37,28 +38,30 @@ def set_chunk():
             return 100000
         validate_input = lines_per_file.replace(".","").replace(",","")
         if validate_input.isdigit():
-          try:
-              chunk = int(validate_input)
-              return chunk
-             
-          except ValueError:
-              print(f"⚠️ Erro na conversão: {ValueError}")
-              continue
-          
+            try:
+                chunk = int(validate_input)
+                return chunk
+            
+            except ValueError:
+                print(f"⚠️ Erro na conversão: {ValueError}")
+                continue
+            
         else: 
             print("\n⚠️ Are you kidding me?")
             time.sleep(1)
 
+
 def list_files():
     files = list_csv_files()
     if files:
-      print("=" * 65)
-      print("\n⚔️ Arquivos disponíveis para splittar: (📂 Folder csv):\n")
-      for idx, f in enumerate(files, start=1): 
-        print(f"{idx} - {f}\n")
-      return files
+        print("=" * 65)
+        print("\n⚔️ Arquivos disponíveis para splittar: (📂 Folder csv):\n")
+        for idx, f in enumerate(files, start=1): 
+            print(f"{idx} - {f}\n")
+        return files
     else:
         return
+
 
 def select_file(files):
     while True:
@@ -87,8 +90,19 @@ def select_file(files):
             print("⚠️ Entrada inválida. Digite apenas números separados por vírgula.")
 
 
-def split_csv(filepaths, chunk):
+def detect_separator(filepath, sample_size=1024, fallback_sep=','):
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            sample = f.read(sample_size)
+            sniffer = csv.Sniffer()
+            dialect = sniffer.sniff(sample)
+            return dialect.delimiter
+    except Exception as e:
+        print(f"⚠️ Erro ao detectar separador, usando padrão ('{fallback_sep}'): {e}")
+        return fallback_sep
 
+
+def split_csv(filepaths, chunk):
     try:
         lines_per_file = int(chunk)
         if lines_per_file <= 0:
@@ -117,9 +131,13 @@ def split_csv(filepaths, chunk):
         print(f"📂 Processando: {fp}")
 
         try:
-            for i, chunk_df in enumerate(pd.read_csv(fp, chunksize=lines_per_file)):
+            # Detecta o separador antes de ler o arquivo
+            separator = detect_separator(fp)
+            
+            for i, chunk_df in enumerate(pd.read_csv(fp, chunksize=lines_per_file, sep=separator)):
                 out_path = output_dir / f"{filename}_part{i+1}.csv"
-                chunk_df.to_csv(out_path, index=False)
+                # Garante que o separador do arquivo de saída é sempre vírgula
+                chunk_df.to_csv(out_path, index=False, sep=',')
                 print(f"[OK] Arquivo gerado: {out_path}")
                 #time.sleep(1)
         except Exception as e:
