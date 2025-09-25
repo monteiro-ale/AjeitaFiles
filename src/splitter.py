@@ -41,11 +41,9 @@ def set_chunk():
             try:
                 chunk = int(validate_input)
                 return chunk
-            
             except ValueError:
                 print(f"⚠️ Erro na conversão: {ValueError}")
-                continue
-            
+                continue           
         else: 
             print("\n⚠️ Are you kidding me?")
             time.sleep(1)
@@ -96,7 +94,7 @@ def detect_separator(filepath, sample_size=1024, fallback_sep=','):
             sample = f.read(sample_size)
             sniffer = csv.Sniffer()
             dialect = sniffer.sniff(sample)
-            return dialect.delimiter
+            return dialect.delimiter, dialect.quotechar
     except Exception as e:
         print(f"⚠️ Erro ao detectar separador, usando padrão ('{fallback_sep}'): {e}")
         return fallback_sep
@@ -132,16 +130,17 @@ def split_csv(filepaths, chunk):
 
         try:
             # Detecta o separador antes de ler o arquivo
-            separator = detect_separator(fp)
+            separator, quotechar = detect_separator(fp)
             
-            for i, chunk_df in enumerate(pd.read_csv(fp, chunksize=lines_per_file, sep=separator)):
+            for i, chunk_df in enumerate(pd.read_csv(fp, chunksize=lines_per_file, sep=separator, quotechar=quotechar)):
                 out_path = output_dir / f"{filename}_part{i+1}.csv"
                 # Garante que o separador do arquivo de saída é sempre vírgula
-                chunk_df.to_csv(out_path, index=False, sep=',')
+                chunk_df.to_csv(out_path, index=False, sep=separator,quotechar=quotechar)
                 print(f"[OK] Arquivo gerado: {out_path}")
                 #time.sleep(1)
         except Exception as e:
             print(f"Erro ao processar {fp}: {e}")
+            time.sleep(200)
 
         finally: 
             print("Split finalizado com sucesso!")
