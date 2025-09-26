@@ -1,6 +1,6 @@
 import duckdb
-from src.config import *
-from src.utils import *
+from src.config.config import *
+from src.utils.utils import *
 import time
 from rich.console import Console
 from rich.table import Table

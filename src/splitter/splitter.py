@@ -3,8 +3,8 @@ import pandas as pd
 from pathlib import Path
 import csv
 import time
-from src.utils import *
-from src.config import *
+from src.utils.utils import *
+from src.config.config import *
 
 
 def split_menu():
@@ -25,7 +25,6 @@ def split_menu():
             return
         split_csv(selected, chunk)
             
-
 def set_chunk():
     while True:
         print("\nDefina a quantidade de linhas por arquivo")
@@ -47,7 +46,6 @@ def set_chunk():
         else: 
             print("\n⚠️ Are you kidding me?")
             time.sleep(1)
-
 
 def list_files():
     files = list_csv_files()
@@ -100,55 +98,6 @@ def detect_separator(filepath, sample_size=1024, fallback_sep=','):
         return {"sep": fallback_sep, "dtype": str, "low_memory": False}, {
           "index": False, "sep": fallback_sep, "quoting": csv.QUOTE_NONE
         }
-
-
-def split_csv(filepaths, chunk):
-    try:
-        lines_per_file = int(chunk)
-        if lines_per_file <= 0:
-            raise ValueError("chunk deve ser > 0")
-    except Exception as e:
-        raise ValueError(f"Parâmetro 'chunk' inválido: {e}")
-
-    output_dir = Path(CSV_DIR) / "splits"
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    # normalizar filepaths para lista
-    if isinstance(filepaths, (str, Path)):
-        filepaths = [filepaths]
-
-    for filepath in filepaths:
-        fp = Path(filepath)
-        if not fp.is_absolute():
-            fp = Path(CSV_DIR) / fp
-
-        if not fp.exists():
-            print(f"⚠️ Arquivo não encontrado, pulando: {fp}")
-            continue
-
-        filename = fp.stem
-        print(f"📂 Processando: {fp}")
-
-        try:
-            # Detecta o separador antes de ler o arquivo
-            kwargs_read, kwargs_write = detect_separator(fp)
-            
-            for i, chunk_df in enumerate(pd.read_csv(fp, chunksize=lines_per_file, **kwargs_read)):
-                out_path = output_dir / f"{filename}_part{i+1}.csv"
-
-                chunk_df.to_csv(out_path, **kwargs_write)
-                print(f"[OK] Arquivo gerado: {out_path}")
-                #time.sleep(1)
-        except Exception as e:
-            print(f"Erro ao processar {fp}: {e}")
-            time.sleep(200)
-
-        finally: 
-            print("Split finalizado com sucesso!")
-            print("Retornando ao menu principal.")
-            time.sleep(2)
-            return
         
 def handle_args(quotechar, delimiter):
        
@@ -177,4 +126,63 @@ def handle_args(quotechar, delimiter):
           "low_memory": False
         }
     return kwargs_read, kwargs_write
+
+def validate_chunk(chunk: int) -> int:
+    try:
+        lines_per_file = int(chunk)
+        if lines_per_file <= 0:
+            raise ValueError("chunk deve ser > 0")
+        return lines_per_file
+    except Exception as e:
+        raise ValueError(f"Parâmetro 'chunk' inválido: {e}")
+
+def prepare_output_dir(base_dir=CSV_DIR) -> Path:
+    output_dir = Path(base_dir) / "splits"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    return output_dir
+
+def normalize_filepaths(filepaths, base_dir=CSV_DIR) -> list[Path]:
+    if isinstance(filepaths, (str, Path)):
+        filepaths = [filepaths]
+
+    normalized = []
+    for fp in filepaths:
+        fp = Path(fp)
+        if not fp.is_absolute():
+            fp = Path(base_dir) / fp
+        if fp.exists():
+            normalized.append(fp)
+        else:
+            print(f"⚠️ Arquivo não encontrado, pulando: {fp}")
+    return normalized
+
+def process_file(fp: Path, lines_per_file: int, output_dir: Path):
+    filename = fp.stem
+    print(f"📂 Processando: {fp}")
+
+    try:
+        kwargs_read, kwargs_write = detect_separator(fp)
+        
+        for i, chunk_df in enumerate(pd.read_csv(fp, chunksize=lines_per_file, **kwargs_read)):
+            out_path = output_dir / f"{filename}_part{i+1}.csv"
+            chunk_df.to_csv(out_path, **kwargs_write)
+            print(f"[OK] Arquivo gerado: {out_path}")
+
+    except Exception as e:
+        print(f"Erro ao processar {fp}: {e}")
+        time.sleep(200)
+
+    finally:
+        print("Split finalizado com sucesso!")
+        print("Retornando ao menu principal.")
+        time.sleep(2)
+
+def split_csv(filepaths, chunk):
+    lines_per_file = validate_chunk(chunk)
+    output_dir = prepare_output_dir()
+    filepaths = normalize_filepaths(filepaths)
+
+    for fp in filepaths:
+        process_file(fp, lines_per_file, output_dir)
+        return
 

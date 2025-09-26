@@ -1,7 +1,7 @@
 import duckdb
 import os
-from src.config import CSV_DIR, BASE_DIR
-from src.utils import *
+from src.config.config import CSV_DIR, BASE_DIR
+from src.utils.utils import *
 from rich.console import Console
 from rich.table import Table
 from rich import box

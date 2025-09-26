@@ -1,6 +1,6 @@
 import os
 import time
-from src.config import *
+from src.config.config import *
 
 def clear():
   return os.system("cls")

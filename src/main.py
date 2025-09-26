@@ -7,11 +7,11 @@ from rich.panel import Panel
 from rich.align import Align
 from rich import box
 
-from src import converter
-from src import quack
-from src import splitter
-from src import utils
-from src import relatorio
+from .conversion import converter
+from .duck import quack
+from .splitter import splitter
+from .utils import utils
+from .reports import relatorio
 
 console = Console()
 
@@ -43,10 +43,8 @@ def main_menu():
         table.add_row("3", "🦆 Rodar Query SQL (DuckDB)")
         table.add_row("4", "🔪 Splitter de Arquivos")
 
-        # Imprime tabela dentro de um painel arredondado
         console.print(Panel(table, width=largura, box=box.ROUNDED))
 
-        # Input com cor
         opcao = console.input("\n👉 [bold cyan]Escolha uma opção:[/bold cyan] ")
 
         if opcao == "0":
