@@ -1,20 +1,41 @@
 # AjeitaFiles
 
-🚧 **Status: Em desenvolvimento** 🚧  
-Este projeto ainda está em fase inicial de desenvolvimento e não deve ser usado por ninguém em sã consciencia.
+🚧 **Status: em desenvolvimento (funcionando mas naquelas..)** 🚧  
+Isso aqui é meu playground pra fuçar em CSV/XLSX, converter encoding, brincar com DuckDB e outras coisas.  
+Se tu tá lendo isso e tu não é eu → nem perca tempo, mas se quiser perder vou deixar a instalação abaixo.
 
-Coisas pra lembrar de implementar no duckmode:
+---
 
-- Rich ou tabulate pra printar result set's de um jeito decente.
+## 🛠️ Instalação
 
-- Tratamento de erros e modularização maior
+### Pré-requisitos
+1. **Python 3.10+**:
+    Precisa ter Python 3.10+ instalado.
+    Na dúvida:
+     ```bash
+     python --version
+     ```
 
-- Uma tela mais maneira pro topo dos modulos, com um dicionario de comandos
-
-Coisas pra lembrar de implementar no reportmode (quando existir):
-
-- Criar queries úteis pro report rodar
-
-- Organizar um print maneiro e resumido
-
-Depois do MVP criar uma nova branch para desenvolver uma TUI.
+2. **Ambiente virtual**:
+    Crie um.
+    ```bash
+    python -m venv venv
+    ```
+    Depois ative.
+    ```bash
+    .\venv\Scripts\activate
+    ```
+---
+3. **Dependências**:
+    Instale-as.
+    ```bash
+    pip install -r requirements.txt
+    ```
+---
+3. **Startando**:
+    Rode.
+    ```bash
+    python run.py
+    ```
+---
+Assim que eu padronizar os menus e comandos eu documento melhor. Tenho que lembrar de criar um --help minimamente decente dentro do programa e um dicionário de comandos. 
