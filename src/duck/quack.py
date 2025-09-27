@@ -47,25 +47,29 @@ def pato_menu():
         return
 
 def importa_csv_banco(persistence):
-    path = f"{BASE_DIR}"+"\\ajeitafiles.duckdb" 
-    con = conectar_duckdb(path)
-    if not con: return
-    else:
-      tables = list_db_tables(con)
-      files = list_csv_files()
-      list_all(tables, files)
-      arq = selecionar_arquivos(files)
-      if arq:
-        pl = carregar_arquivos(con, arq, persistence)
-        if pl:
-            print("=" * 60)
-            print(f"⚡ Arquivos carregados em memória:")
-            for i in arq:
-                print(f"- {i}\n")
-            print("=" * 60)
-            loop_interativo(pl)
-        else: return
-      else: return #que tripa de codigo horrivel...
+
+    con = conectar_duckdb(f"{BASE_DIR}\\ajeitafiles.duckdb")
+    if not con:
+        return
+
+    tables = list_db_tables(con)
+    files = list_csv_files()
+    list_all(tables, files)
+    arquivos = selecionar_arquivos(files)
+    if not arquivos:
+        return
+    pl = carregar_arquivos(con, arquivos, persistence)
+    if not pl:
+        return
+    mostrar_arquivos_carregados(arquivos)
+    loop_interativo(pl)
+
+def mostrar_arquivos_carregados(arquivos):
+    print("=" * 60)
+    print("⚡ Arquivos carregados em memória:")
+    for arq in arquivos:
+        print(f"- {arq}")
+    print("=" * 60)
 
 def list_all(tables, files):
     if tables:
