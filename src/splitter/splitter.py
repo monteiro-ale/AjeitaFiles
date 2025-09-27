@@ -4,6 +4,7 @@ from pathlib import Path
 import csv
 import time
 from src.utils.utils import *
+from src.utils.menu import *
 from src.config.config import *
 
 
@@ -15,15 +16,14 @@ def split_menu():
     print("=" * largura)
     print(title.center(largura))
     print("=" * largura)
-    files = list_files()
-    if files:
-        selected = select_file(files)
-        if selected is None:
-            return
-        chunk = set_chunk()
-        if chunk is None:
-            return
-        split_csv(selected, chunk)
+    files = list_files_to_split()
+    selected = select_file(files)
+    if selected is None:
+        return
+    chunk = set_chunk()
+    if chunk is None:
+        return
+    split_csv(selected, chunk)
             
 def set_chunk():
     while True:
@@ -32,7 +32,7 @@ def set_chunk():
         print("Digite \\exit para voltar ao menu anterior\n")
         lines_per_file = input("Pelo amor de deus digite apenas numeros aqui: ")
         if lines_per_file == "\\exit":
-            return
+            return None
         if not lines_per_file:
             return 100000
         validate_input = lines_per_file.replace(".","").replace(",","")
@@ -47,8 +47,12 @@ def set_chunk():
             print("\n⚠️ Are you kidding me?")
             time.sleep(1)
 
-def list_files():
-    files = list_csv_files()
+def list_files_to_split():
+    files = get_csv_files()
+    if not files:
+        warn("Nenhum arquivo csv encontrado")
+        time.sleep(1.5)
+        return
     if files:
         print("=" * 65)
         print("\n⚔️ Arquivos disponíveis para splittar: (📂 Folder csv):\n")
@@ -68,7 +72,7 @@ def select_file(files):
         escolha = input("\n>").strip()
 
         if escolha == "\\exit":
-            return
+            return None
         if not escolha:
             return files  
 

@@ -2,6 +2,7 @@ import duckdb
 import os
 from src.config.config import CSV_DIR, BASE_DIR
 from src.utils.utils import *
+from src.utils.menu import *
 from rich.console import Console
 from rich.table import Table
 from rich import box
@@ -52,17 +53,25 @@ def importa_csv_banco(persistence):
     if not con:
         return
 
-    tables = list_db_tables(con)
-    files = list_csv_files()
+    tables = get_db_tables(con)
+    if not tables:
+        warn("Nenhuma tabela salva no banco persistente.")
+
+    files = get_csv_files()
+    if not files:
+        warn("Nenhum arquivo encontrado na folder CSV.")
+
     list_all(tables, files)
-    arquivos = selecionar_arquivos(files)
+    arquivos = handle_user_choice(files)
     if not arquivos:
         return
-    pl = carregar_arquivos(con, arquivos, persistence)
-    if not pl:
+    processed = process_files(con, arquivos, persistence)
+    if not processed:
         return
     mostrar_arquivos_carregados(arquivos)
-    loop_interativo(pl)
+    loop_interativo(processed)
+
+
 
 def mostrar_arquivos_carregados(arquivos):
     print("=" * 60)
@@ -110,7 +119,7 @@ def conectar_duckdb(db_path):
             time.sleep(10)
             return None
 
-def selecionar_arquivos(files):
+def handle_user_choice(files):
     while True:
         print("=" * 65)
         print("📁 Selecione os arquivos CSV para carregar")
@@ -120,7 +129,7 @@ def selecionar_arquivos(files):
         escolha = input("\n>").strip()
 
         if escolha == "\\exit":
-            return
+            return None
         if not escolha:
             return files  
 
@@ -136,7 +145,7 @@ def selecionar_arquivos(files):
         except ValueError:
             print("⚠️ Entrada inválida. Digite apenas números separados por vírgula.")
 
-def carregar_arquivos(con, arquivos, persistence):
+def process_files(con, arquivos, persistence):
       if persistence:
         query = "CREATE OR REPLACE TABLE"
       else:

@@ -10,14 +10,14 @@ from rich import box
 from .conversion import converter
 from .duck import quack
 from .splitter import splitter
-from .utils import utils
+from .utils import menu
 from .reports import relatorio
 
 console = Console()
 
 def main_menu():
     while True:
-        utils.clear()
+        menu.clear()
 
         largura = 65 
         gambiarra = 82

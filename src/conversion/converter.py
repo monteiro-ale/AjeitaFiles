@@ -2,26 +2,23 @@ import os
 import pandas as pd
 import time
 import chardet
-from src.config.config import XLSX_DIR, CSV_DIR, BASE_DIR
+from rich import print
+from src.config.config import *
 from src.utils.utils import *
+from src.utils.menu import *
 
 def convert_menu():
     while True:
         clear()
-        largura = 65
-        print("=" * largura)
-        print("🔄 MÓDULO DE CONVERSÃO 🔄".center(largura))
-        print("=" * largura)
-        print("Selecione o tipo de conversão:\n".center(largura))
-        print("0 - Voltar".ljust(largura))
-        print("1 - Converter XLSX para CSV".ljust(largura))
-        print("2 - Converter encoding de arquivo CSV".ljust(largura))
-        print("=" * largura)
-
+        opt = ["Converter XLSX para CSV",
+               "Converter encoding de arquivo CSV",
+               "\\exit - Sair"]
+        
+        print_menu("🔄 MÓDULO DE CONVERSÃO 🔄", opt)
 
         opcao = input("Escolha uma opção: ")
 
-        if opcao == "0":
+        if opcao in("\\exit", "3", "0"):
             clear()
             return
         elif opcao == "1":
@@ -31,8 +28,7 @@ def convert_menu():
             exec_convert_encoding()
             clear()
         else: 
-            print("⚠️ Opção inválida, tente novamente!")
-            time.sleep(1)
+            warn("Opção inválida, tente novamente!", 1)
             clear()
 
 def detect_encoding(input_path: Path, sample_size=100_000) -> str | None:
@@ -75,25 +71,25 @@ def encoding_info(encoding: str) -> None:
         "utf-16": "UTF-16 (Unicode em 2 bytes; comum em arquivos do Windows e Excel, precisa de BOM para indicar ordem)",
     }
     info = familias.get(encoding.lower(), "Não tenho mais infos pra este encoding D:")
-    print(f"Encoding detectado: {encoding}\nInfos → {info}")
+    return info
 
 def handle_encoding_choice(files: list[str], escolha: str) -> None:
     arquivo = files[int(escolha) - 1]
     input_path = CSV_DIR / arquivo
-    largura = 65
 
     original_encoding = detect_encoding(input_path)
     if not original_encoding:
-        print("Erro ao detectar encoding!")
+        error("Erro ao detectar encoding!")
         return
 
     clear()
-    print("=" * largura)
-    print("Informações sobre o arquivo".center(largura))
-    print(f"\nNome do Arquivo → {arquivo}\n")
-    print("=" * largura)
-    encoding_info(original_encoding)
-    print("=" * largura)
+    enc_info = encoding_info(original_encoding)
+    print("[bold yellow]Informações sobre o arquivo[/bold yellow]\n")
+    print(f"Nome do Arquivo → {arquivo}")
+    print(f"Encoding de entrada → {original_encoding}\n")
+    info(enc_info)
+    print("\nPressione [bold yellow]ENTER[/bold yellow] para converter.")
+    input()
 
     base_name = Path(arquivo).stem
     output_file = f"{base_name}_UTF8.csv"
@@ -103,99 +99,82 @@ def handle_encoding_choice(files: list[str], escolha: str) -> None:
     time.sleep(1)
 
 def exec_convert_encoding():
-    files = list_csv_files()
-    clear()
-    largura = 65
-
+    files = get_csv_files()
     if not files:
-        print("=" * largura)
-        print("⚠️ Nenhum arquivo CSV encontrado!".center(largura))
-        print("=" * largura)
-        time.sleep(1.5)
+        warn("Nenhum arquivo CSV encontrado!", 1.5)
         return
-
-    print("=" * largura)
-    print("🌐 CONVERSÃO DE ENCODING DE CSV 🌐".center(largura))
-    print("=" * largura)
-    print("⚠️ Atualmente só posso converter pra UTF-8 ⚠️".center(largura))
-    print()
-
-    for idx, f in enumerate(files, start=1):
-        print(f"{idx} 📄 {f}".ljust(largura))
-
-    print("=" * largura)
-    escolha = input("Escolha o arquivo para converter (ou 0 para voltar): ")
-
-    if escolha == "0":
-        return
-    elif escolha.isdigit() and 1 <= int(escolha) <= len(files):
-        handle_encoding_choice(files, escolha)
-        print("\n✅ Conversão concluída com sucesso!")
-        time.sleep(1)
     else:
-        print("=" * largura)
-        print("⚠️ Opção inválida, tente novamente!".center(largura))
-        print("=" * largura)
-        time.sleep(1)
+      clear()
+      largura = 65
+
+      print_menu("🌐 CONVERSÃO DE ENCODING DE CSV 🌐", files)
+      print("⚠️ Atualmente só posso converter pra UTF-8 ⚠️".center(largura))
+      print()
+      escolha = input("Escolha o arquivo para converter (ou \\exit para voltar): ")
+
+      if escolha in ("\\exit", "exit", "0"):
+          return
+      elif escolha.isdigit() and 1 <= int(escolha) <= len(files):
+          handle_encoding_choice(files, escolha)
+          print("\n✅ Conversão concluída com sucesso!")
+          time.sleep(1)
+      else:
+          warn("Opção inválida, tente novamente!", 1)
 
 def exec_convert_format():
-    files = list_xlsx_files()
+    files = get_xlsx_files()
     clear()
-    largura = 65
 
     if not files:
-        print("=" * largura)
-        print("⚠️  Nenhum arquivo XLSX encontrado!".center(largura))
-        print("=" * largura)
-        time.sleep(1.5)
+        warn("Nenhum arquivo XLSX encontrado!", 1.5)
         return
 
-    print("=" * largura)
-    print("📈 ARQUIVOS XLSX DISPONÍVEIS 📈".center(largura))
-    print("=" * largura)
+    print_menu("📈 ARQUIVOS XLSX DISPONÍVEIS 📈", files)
+    opcao = input("Escolha o arquivo para converter (ou \\exit para voltar): ")
 
-    for idx, f in enumerate(files, start=1):
-        print(f"{idx} 📑 {f}".ljust(largura))
-
-    print("=" * largura)
-    opcao = input("Escolha o arquivo para converter (ou 0 para voltar): ")
-
-    if opcao == "0":
+    if opcao in ("\\exit", "exit", "0"):
         return
 
     elif opcao.isdigit() and 1 <= int(opcao) <= len(files):
         arquivo_selecionado = files[int(opcao) - 1]
 
-        input_path = XLSX_DIR / arquivo_selecionado
-        output_file = Path(arquivo_selecionado).stem + ".csv"
-        output_path = CSV_DIR / output_file
+        args, output_file = prepare_path(arquivo_selecionado)
 
-        convert_xlsx_to_csv(input_path, output_path)
+        convert_xlsx_to_csv(**args)
         print(f"\n✅ Arquivo convertido com sucesso: {output_file}")
         time.sleep(1.5)
 
     else:
-        print("=" * largura)
-        print("⚠️  Opção inválida, tente novamente!".center(largura))
-        print("=" * largura)
-        time.sleep(1)
+        warn("Opção inválida, tente novamente!", 1)
         return
-    
-def convert_xlsx_to_csv(input_path, output_dir, encoding="utf-8"): 
+
+def prepare_path(file):   
+    output_file = Path(file).stem + ".csv"
+    args = {
+    "input_path": XLSX_DIR / file,
+    "output_path": CSV_DIR 
+    }
+
+    return args, output_file
+
+def convert_xlsx_to_csv(input_path, output_path, encoding="utf-8"): 
     try:
         xls = pd.ExcelFile(input_path)
+        base_name = Path(input_path).stem
+        out_dir = Path(output_path) / base_name
+        out_dir.mkdir(parents=True, exist_ok=True)
+
         for sheet_name in xls.sheet_names:
             df = pd.read_excel(xls, sheet_name=sheet_name)
-            base_name = os.path.splitext(os.path.basename(input_path))[0]
-            output_file = f"{base_name}_{sheet_name}.csv"
-            output_path = os.path.join(output_dir, output_file)
-            os.makedirs(output_dir, exist_ok=True)
-            df.to_csv(output_path, index=False, encoding=encoding)
+            output_file = out_dir / f"{base_name}_{sheet_name}.csv"
+            df.to_csv(output_file, index=False, encoding=encoding)
             print(f"✅ Aba '{sheet_name}' convertida: {output_path}")
+
     except FileNotFoundError:
-        print("Arquivo de entrada não encontrado!")
+        error("Arquivo de entrada não encontrado!")
         return
     except Exception as e:
-        print(f"Erro ao converter: {e}")
+        error(f"Erro ao converter: {e}")
         time.sleep(8)
         return
+

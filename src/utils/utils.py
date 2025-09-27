@@ -1,29 +1,32 @@
+# src/utils.py
 import os
-import time
-from src.config.config import *
+from src.config.config import CSV_DIR, XLSX_DIR
 
-def clear():
-  return os.system("cls")
+def get_files(directory: str, extension: str) -> list[str]:
 
-#Lembrar de mais algumas outras uteis 
+    return [
+        f for f in os.listdir(directory) 
+        if f.lower().endswith(extension.lower())
+    ]
 
-def list_csv_files():
-    #Lista os csv's da folder csv.
-    files = [f for f in os.listdir(CSV_DIR) if f.lower().endswith(".csv")]
-    if not files:
-      print("⚠️ Nenhum arquivo CSV encontrado na pasta data/csv.")
-      time.sleep(5)
-      return
-    else:
-      return files
-    
-def list_xlsx_files():
-    #Lista arquivos XLSX da pasta data/xlsx
-    files = [f for f in os.listdir(XLSX_DIR) if f.lower().endswith(".xlsx")]
-    if not files:
-      print("⚠️ Nenhum arquivo XLSX encontrado na pasta data/xlsx")
-      time.sleep(5)
-      return
-    else:
-      return files
-    
+def get_csv_files() -> list[str]:
+    return get_files(CSV_DIR, ".csv")
+
+def get_xlsx_files() -> list[str]:
+    return get_files(XLSX_DIR, ".xlsx")
+
+#Lista as tabelas do database.
+def get_db_tables(con):
+    try:
+        tables = con.execute("SHOW TABLES").fetchall()
+        if not [t[0] for t in tables]:
+            return []
+        else:
+          print("="*65)
+          print("💾 Tabelas já existentes no banco:".center(65))
+          print("="*65)
+          print("\n")
+        return [t[0] for t in tables]
+    except Exception as e:
+        print(f"Erro ao listar tabelas no banco.{e}")
+        return None

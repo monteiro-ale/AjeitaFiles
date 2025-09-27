@@ -1,6 +1,7 @@
 import duckdb
 from src.config.config import *
 from src.utils.utils import *
+from src.utils.menu import *
 import time
 from rich.console import Console
 from rich.table import Table
@@ -25,7 +26,7 @@ def relatorio_menu():
     else: exec_relatorio(selected)
 
 def list_files():
-    files = list_csv_files()
+    files = get_csv_files()
     if files:
       print("=" * 65)
       print("\n Arquivos disponíveis para análise: (📂 Folder csv):\n")
