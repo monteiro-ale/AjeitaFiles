@@ -32,7 +32,7 @@ Instale-as.
 pip install -r requirements.txt
 ```
 ---
-#### 3. Startando:
+#### 4. Startando:
 Rode.
 ```bash
 python run.py
