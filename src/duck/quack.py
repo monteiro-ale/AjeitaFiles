@@ -13,21 +13,18 @@ console = Console()
 
 def pato_menu():
     clear()
-    largura = 65
-    title = "MODULO DUCKDB"
+    title = ":duck: MODULO DUCKDB :duck:"
+    opt = [
+       "Voltar ao menu anterior",
+       "Importar CSV para o banco persistente (:optical_disk: disco)",
+       "Carregar CSV temporariamente na RAM (:floppy_disk: in-memory)",
+       "Usar tabelas já existentes no banco persistente :file_cabinet:"      
+    ]
 
-    print("=" * largura)
-    print(title.center(largura))
-    print("=" * largura)
-    print("\n📂 MENU INICIAL")
-    print("Escolha uma das opções abaixo:\n")
-    print("1 - Importar CSV para o banco persistente (💽 disco)")
-    print("2 - Carregar CSV temporariamente na RAM (💾 in-memory)")
-    print("3 - Usar tabelas já existentes no banco persistente")
-    print("4 - Voltar ao menu anterior\n")
-    print("=" * 65)
+    print_menu(title, opt, "bold yellow")
+    print("Escolha uma das opções acima:\n")
     e = input(">").strip()
-    if e == "4":
+    if e in ("4", "\\exit", "exit", "0"):
         return
     elif e == "1":
         clear()
@@ -44,7 +41,7 @@ def pato_menu():
       loop_interativo(con)
       return
     else:
-        print("Opção inválida, digite apenas números")
+        warn("Opção inválida, digite apenas números",1)
         return
 
 def importa_csv_banco(persistence):
@@ -55,7 +52,7 @@ def importa_csv_banco(persistence):
 
     tables = get_db_tables(con)
     if not tables:
-        warn("Nenhuma tabela salva no banco persistente.")
+        warn("Nenhuma tabela salva no banco persistente.", 0)
 
     files = get_csv_files()
     if not files:
@@ -72,7 +69,7 @@ def importa_csv_banco(persistence):
     loop_interativo(processed)
 
 
-
+#function inutil, tirar depois
 def mostrar_arquivos_carregados(arquivos):
     print("=" * 60)
     print("⚡ Arquivos carregados em memória:")

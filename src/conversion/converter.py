@@ -10,21 +10,23 @@ from src.utils.menu import *
 def convert_menu():
     while True:
         clear()
-        opt = ["Converter XLSX para CSV",
-               "Converter encoding de arquivo CSV",
-               "\\exit - Sair"]
+        opt = [
+            ":fast_reverse_button: Voltar ao menu anterior",
+            ":counterclockwise_arrows_button: Converter XLSX para CSV",
+            ":counterclockwise_arrows_button: Converter encoding de arquivo CSV"
+        ]
         
         print_menu("🔄 MÓDULO DE CONVERSÃO 🔄", opt)
 
         opcao = input("Escolha uma opção: ")
 
-        if opcao in("\\exit", "3", "0"):
+        if opcao in("\\exit", "0"):
             clear()
             return
-        elif opcao == "1":
+        elif opcao == "2":
             exec_convert_format()
             clear()
-        elif opcao == "2":
+        elif opcao == "3":
             exec_convert_encoding()
             clear()
         else: 
