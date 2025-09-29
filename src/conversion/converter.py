@@ -7,6 +7,7 @@ from src.config.config import *
 from src.utils.utils import *
 from src.utils.menu import *
 
+#Menu de conversão.
 def convert_menu():
     while True:
         clear()
@@ -76,7 +77,7 @@ def encoding_info(encoding: str) -> None:
     return info
 
 def handle_encoding_choice(files: list[str], escolha: str) -> None:
-    arquivo = files[int(escolha) - 1]
+    arquivo = files[int(escolha)]
     input_path = CSV_DIR / arquivo
 
     original_encoding = detect_encoding(input_path)
@@ -102,21 +103,20 @@ def handle_encoding_choice(files: list[str], escolha: str) -> None:
 
 def exec_convert_encoding():
     files = get_csv_files()
+    qtd_options = len(files) -1
     if not files:
         warn("Nenhum arquivo CSV encontrado!", 1.5)
         return
     else:
       clear()
-      largura = 65
-
       print_menu("🌐 CONVERSÃO DE ENCODING DE CSV 🌐", files)
-      print("⚠️ Atualmente só posso converter pra UTF-8 ⚠️".center(largura))
+      info("Atualmente só posso converter pra UTF-8 D:")
       print()
       escolha = input("Escolha o arquivo para converter (ou \\exit para voltar): ")
 
-      if escolha in ("\\exit", "exit", "0"):
+      if escolha in ("\\exit", "exit", "00"):
           return
-      elif escolha.isdigit() and 1 <= int(escolha) <= len(files):
+      elif escolha.isdigit() and 0 <= int(escolha) <= qtd_options:
           handle_encoding_choice(files, escolha)
           print("\n✅ Conversão concluída com sucesso!")
           time.sleep(1)
@@ -151,6 +151,7 @@ def exec_convert_format():
         warn("Opção inválida, tente novamente!", 1)
         return
 
+#Sim, esta function não precisava existir, fi-lo porque qui-lo.
 def prepare_path(file):   
     output_file = Path(file).stem + ".csv"
     args = {
