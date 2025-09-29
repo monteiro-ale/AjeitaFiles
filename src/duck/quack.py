@@ -1,6 +1,6 @@
 import duckdb
 import os
-from src.config.config import CSV_DIR, BASE_DIR
+from src.config.config import *
 from src.utils.utils import *
 from src.utils.menu import *
 from rich.console import Console
@@ -21,7 +21,7 @@ def pato_menu():
        "Usar tabelas já existentes no banco persistente :file_cabinet:"      
     ]
 
-    print_menu(title, opt, "bold yellow")
+    print_menu(title, opt, M_DUCK)
     print("Escolha uma das opções acima:\n")
     e = input(">").strip()
     if e in ("4", "\\exit", "exit", "0"):

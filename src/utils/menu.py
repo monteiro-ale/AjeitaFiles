@@ -64,7 +64,7 @@ def print_menu(title: str, options: list[str], style: str = "bold cyan"):
     
     menu_items = []
     for i, opt in enumerate(options, start=0):
-        item = f"[bold green]{i}[/bold green] - {opt}"
+        item = f"[{style}]{i}[/{style}] - {opt}"
         menu_items.append(item)
 
     content = "\n".join(menu_items)

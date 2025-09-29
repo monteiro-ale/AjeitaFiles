@@ -17,7 +17,7 @@ def convert_menu():
             ":counterclockwise_arrows_button: Converter encoding de arquivo CSV"
         ]
         
-        print_menu("🔄 MÓDULO DE CONVERSÃO 🔄", opt)
+        print_menu("🔄 MÓDULO DE CONVERSÃO 🔄", opt, M_CONVERTER)
 
         opcao = input("Escolha uma opção: ")
 
@@ -109,8 +109,8 @@ def exec_convert_encoding():
         return
     else:
       clear()
-      print_menu("🌐 CONVERSÃO DE ENCODING DE CSV 🌐", files)
-      info("Atualmente só posso converter pra UTF-8 D:")
+      print_menu("🌐 CONVERSÃO DE ENCODING DE CSV 🌐", files, M_CONVERTER)
+      info("Atualmente só posso converter pra UTF-8 :/")
       print()
       escolha = input("Escolha o arquivo para converter (ou \\exit para voltar): ")
 
@@ -132,7 +132,7 @@ def exec_convert_format():
         warn("Nenhum arquivo XLSX encontrado!", 1.5)
         return
 
-    print_menu("📈 ARQUIVOS XLSX DISPONÍVEIS 📈", files)
+    print_menu("📈 ARQUIVOS XLSX DISPONÍVEIS 📈", files, M_CONVERTER)
     opcao = input("Escolha o arquivo para converter (ou \\exit para voltar): ")
     
     if opcao in ("\\exit", "exit", "00"):
