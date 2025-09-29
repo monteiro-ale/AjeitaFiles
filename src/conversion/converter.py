@@ -23,10 +23,10 @@ def convert_menu():
         if opcao in("\\exit", "0"):
             clear()
             return
-        elif opcao == "2":
+        elif opcao == "1":
             exec_convert_format()
             clear()
-        elif opcao == "3":
+        elif opcao == "2":
             exec_convert_encoding()
             clear()
         else: 

@@ -128,7 +128,7 @@ def input_keys(con, cols, table_name):
                 f"(Chaves: {', '.join(keys)})"
             )
     else:
-        flash_message("Alea iacta est...", delay=1)
+        #Alea iacta est...
         table_dupes.add_row("Linhas duplicadas: 0 (Colunas-chave não informadas)")
 
     console.print(table_dupes)
@@ -212,8 +212,5 @@ def column_null(con, cols, table_name):    # Valores nulos por coluna
     time.sleep(1)
     con.close()
 
-def flash_message(msg, delay=0.5):
-    print(msg, end="\r", flush=True)
-    time.sleep(delay)
-    print(" " * (len(msg) + 10), end="\r", flush=True)
+
 

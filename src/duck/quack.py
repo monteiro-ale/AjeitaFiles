@@ -69,7 +69,7 @@ def importa_csv_banco(persistence):
     loop_interativo(processed)
 
 
-#function inutil, tirar depois
+#function quase inutil, tirar depois.
 def mostrar_arquivos_carregados(arquivos):
     print("=" * 60)
     print("⚡ Arquivos carregados em memória:")
