@@ -125,6 +125,7 @@ def exec_convert_encoding():
 
 def exec_convert_format():
     files = get_xlsx_files()
+    qtd_options = len(files) - 1
     clear()
 
     if not files:
@@ -133,12 +134,12 @@ def exec_convert_format():
 
     print_menu("📈 ARQUIVOS XLSX DISPONÍVEIS 📈", files)
     opcao = input("Escolha o arquivo para converter (ou \\exit para voltar): ")
-
-    if opcao in ("\\exit", "exit", "0"):
+    
+    if opcao in ("\\exit", "exit", "00"):
         return
 
-    elif opcao.isdigit() and 1 <= int(opcao) <= len(files):
-        arquivo_selecionado = files[int(opcao) - 1]
+    elif opcao.isdigit() and 0 <= int(opcao) <= qtd_options:
+        arquivo_selecionado = files[int(opcao)]
 
         args, output_file = prepare_path(arquivo_selecionado)
 
