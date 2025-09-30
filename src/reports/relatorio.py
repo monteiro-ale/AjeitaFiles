@@ -77,14 +77,16 @@ def diagnostico_duckdb(filepath, table_name="tabela"):
     printa_diagnostico(con, table_name)
 
 def printa_diagnostico(con, table_name):
-    cols = count_lines_and_columns(con, table_name)
+    clear()
+    cols = preview_table(con, table_name)
+    count_lines_and_columns(con, table_name, cols)
     input_keys(con, cols, table_name)
     constant_columns(con,cols, table_name)
     column_cardinality(con, cols, table_name)
     column_null(con, cols, table_name)
 
 def input_keys(con, cols, table_name):
-    colnames = [c[1] for c in cols]
+    colnames = cols
 
     console.print("🔑 Informe as colunas-chave para verificar duplicidade")
     console.print("   - Digite os nomes separados por vírgula (ex: ID,EMAIL)")
@@ -153,20 +155,45 @@ def exec_sql_duplicty(con, table_name, where_clause, keys_str):
     """).fetchone()
     return row
 
-def count_lines_and_columns(con, table_name):
-    shape = con.execute(f"SELECT COUNT(*) AS linhas FROM {table_name}").fetchone()[0]
-    cols = con.execute(f"PRAGMA table_info({table_name})").fetchall()
-    console.print(f"Linhas: [bold]{shape:,}[/bold]")
-    console.print(f"Colunas: [bold]{len(cols)}[/bold]\n")
+def preview_table(con, table_name, max_rows=4, max_cols=10):
+    n_rows = con.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
+    cols = [c[1] for c in con.execute(f"PRAGMA table_info({table_name})").fetchall()]
+
+    if len(cols) <= max_cols:
+        rows = con.execute(f"SELECT * FROM {table_name} LIMIT {max_rows}").fetchall()
+
+        table = Table(show_header=True, title="Preview de Colunas", header_style="bold magenta")
+        for col in cols:
+            table.add_column(col, overflow="fold")
+
+        for row in rows:
+            table.add_row(*[str(r) for r in row])
+
+        console.print(table)
+    else:
+        # se for muita coluna, mostra só a lista organizada
+        col_text = ", ".join(cols)
+        console.print(
+            Panel(col_text, title="Preview de Colunas", border_style="cyan", expand=False)
+        )
+    #console.print(f"Linhas: [bold]{n_rows:,}[/bold]")
+    #console.print(f"Colunas: [bold]{len(cols)}[/bold]\n")
+
     return cols
+
+def count_lines_and_columns(con, table_name, cols):
+    n_rows = con.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
+
+    info = Table(title="Informações da Tabela", show_header=False, box=None)
+    info.add_row("Linhas", f"[bold]{n_rows:,}[/bold]")
+    info.add_row("Colunas", f"[bold]{len(cols)}[/bold]")
 
 def constant_columns(con, cols, table_name):  
     constantes = []
     for c in cols:
-        col = c[1]
-        distincts = con.execute(f'SELECT COUNT(DISTINCT "{col}") FROM "{table_name}"').fetchone()[0]
+        distincts = con.execute(f'SELECT COUNT(DISTINCT "{c}") FROM "{table_name}"').fetchone()[0]
         if distincts == 1:
-            constantes.append(col)
+            constantes.append(c)
 
     table_const = Table(title="🔹 Colunas constantes", show_lines=True)
     table_const.add_column("Coluna", style="cyan")
@@ -185,9 +212,8 @@ def column_cardinality(con, cols, table_name):
     table_card.add_column("Coluna", style="magenta")
     table_card.add_column("Valores únicos", justify="right", style="yellow")
     for c in cols:
-        col = c[1]
-        nuniq = con.execute(f'SELECT COUNT(DISTINCT "{col}") FROM "{table_name}"').fetchone()[0]
-        table_card.add_row(col, f"{nuniq:,}")
+        nuniq = con.execute(f'SELECT COUNT(DISTINCT "{c}") FROM "{table_name}"').fetchone()[0]
+        table_card.add_row(c, f"{nuniq:,}")
     console.print(table_card)
     console.print()
     console.print("📌 Pressione [bold green]ENTER[/bold green] para continuar para a próxima seção...", style="yellow")
@@ -198,9 +224,8 @@ def column_null(con, cols, table_name):    # Valores nulos por coluna
     table_null.add_column("Coluna", style="red")
     table_null.add_column("Nulos", justify="right", style="bright_red")
     for c in cols:
-        col = c[1]
-        nnulos = con.execute(f'SELECT COUNT(*) FROM "{table_name}" WHERE "{col}" IS NULL').fetchone()[0]
-        table_null.add_row(col, f"{nnulos:,}")
+        nnulos = con.execute(f'SELECT COUNT(*) FROM "{table_name}" WHERE "{c}" IS NULL').fetchone()[0]
+        table_null.add_row(c, f"{nnulos:,}")
     console.print(table_null)
     console.print()
     console.print("📌 Pressione [bold green]ENTER[/bold green] para continuar para a próxima seção...", style="yellow")

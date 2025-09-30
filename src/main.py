@@ -47,7 +47,7 @@ def main_menu():
                             width=largura, 
                             box=box.ROUNDED, 
                             style=M_HEADER, 
-                            title="[bold #F6E4C0]MENU[/bold #F6E4C0]", padding= (1,2)))
+                            title="[bold #99C8F2]MENU[/bold #99C8F2]", padding= (1,2)))
                             #padding=(1,2))
 
         opcao = console.input("\n📌 [bold white]Escolha uma opção:[/bold white] ")
@@ -76,3 +76,4 @@ def main_menu():
 
 if __name__ == "__main__":
     main_menu()
+
