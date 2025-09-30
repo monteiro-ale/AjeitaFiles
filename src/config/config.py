@@ -11,6 +11,6 @@ CSV_DIR.mkdir(parents=True, exist_ok=True)
 
 M_MAIN = "#FFD700"  # Ouro
 M_CONVERTER = "#9ed0ae"  # Verde
-M_REPORT = "#1E90FF"  # Azul
+M_REPORT = "#99C8F2"  # Azul
 M_CONFIG    = "#A9A9A9"  # Cinza
 M_DUCK = "#6495ED"

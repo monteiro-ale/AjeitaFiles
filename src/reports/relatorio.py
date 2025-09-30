@@ -11,16 +11,12 @@ console = Console()
 
 def relatorio_menu():
     clear()
-    largura = 65
-    title = "📊 MODULO RELATÓRIO 📊"
-
-    print("=" * largura)
-    print(title.center(largura))
-    print("=" * largura)
     files = list_files()
     if files:
         selected = select_file(files)
-    else: return
+    else:
+        warn("Não encontrei arquivos no diretório: 📂 AjeitaFiles/data/csv/:") 
+        return
     if selected is None:
         return
     else: exec_relatorio(selected)
@@ -28,21 +24,21 @@ def relatorio_menu():
 def list_files():
     files = get_csv_files()
     if files:
-      print("=" * 65)
-      print("\n Arquivos disponíveis para análise: (📂 Folder csv):\n")
-      for idx, f in enumerate(files, start=1): 
-        print(f"{idx} - {f}\n")
+      title = "📊 MODULO RELATÓRIO 📊"
+      com = [
+        "Digite o número dos arquivos separados por vírgula",
+        "Digite \\exit para voltar ao menu anterior",
+        "Digite ENTER para selecionar todos os arquivos"
+      ]
+      print_header(title, com, M_REPORT)
       return files
     else:
         return
 
 def select_file(files):
     while True:
-        print("=" * 65)
-        print("📁 Selecione o arquivos .CSV para gerar relatório")
-        print("🔢 Digite o número dos arquivos separados por vírgula")
-        print("↩️ Digite \\exit para voltar ao menu anterior")
-        print("🗃️ Digite ENTER para selecionar todos os arquivos")
+        print_menu("📁 Selecione o(s) arquivo(s) para gerar relatório", files, M_REPORT)
+        info("Arquivos listados no path: 📂 AjeitaFiles/data/csv/:")
         escolha = input("\n>").strip()
 
         if escolha == "\\exit":
@@ -51,9 +47,10 @@ def select_file(files):
             return files  
 
         try:
-            indices = [int(x.strip()) - 1 for x in escolha.split(",")]
+            indices = [int(x.strip()) for x in escolha.split(",")]
             if any(i < 0 or i >= len(files) for i in indices):
                 print("⚠️ Um ou mais números estão fora do intervalo válido.")
+                #clear()
                 continue
 
             arquivos_selecionados = [files[i] for i in indices]

@@ -3,6 +3,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from rich import box
+from src.config.config import *
 
 console = Console()
 
@@ -79,3 +80,39 @@ def print_menu(title: str, options: list[str], style: str = "bold cyan"):
     )   
     console.print(menu_panel)
 
+#Acho que vou precisar, mas por enquanto é inútil.
+def print_header(title: str, options: list[str], style: str = "bold cyan"):
+    menu_items = []
+    for opt in (options):
+        item = f"[{M_CONFIG}]- {opt}"
+        menu_items.append(item)
+
+    content = "\n".join(menu_items)
+
+    menu_panel = Panel(
+        content,
+        title=f" {title} ",
+        border_style=style,
+        box=box.ROUNDED,
+        padding=(1, 2),
+        expand=False
+    )   
+    console.print(menu_panel)
+
+def commands(title: str, options: list[str], style: str = "bold cyan"):
+    menu_items = []
+    for opt in (options):
+        item = f"[{style}]- {opt}"
+        menu_items.append(item)
+
+    content = "\n".join(menu_items)
+
+    menu_panel = Panel(
+        content,
+        title=f" {title} ",
+        border_style=style,
+        box=box.ROUNDED,
+        padding=(1, 2),
+        expand=False
+    )   
+    console.print(menu_panel)
