@@ -16,6 +16,7 @@ def split_menu():
     print("=" * largura)
     print(title.center(largura))
     print("=" * largura)
+    info("Este módulo ainda está na versão v.0.")
     files = list_files_to_split()
     selected = select_file(files)
     if selected is None:

@@ -7,6 +7,7 @@ from rich.panel import Panel
 from rich.align import Align
 from rich import box
 
+from .config.config import *
 from .conversion import converter
 from .duck import quack
 from .splitter import splitter
@@ -20,35 +21,39 @@ def main_menu():
         menu.clear()
 
         largura = 65 
-        gambiarra = 82
+        #gambiarra = 85 --talvez eu precise de novo
 
         console.print(Panel(
-            "📋 [bold green]MENU PRINCIPAL[/bold green] 📋".center(gambiarra),
+            "[bold]/📂 AjeitaFiles/[/bold]".center(largura),
             width=largura,
-            style="cyan",
-            title="📂 AjeitaFiles",
+            style=M_HEADER,
             title_align="center",
             padding=(1, 2)
         ))
 
         # Cria tabela de opções com largura fixa
-        table = Table(show_header=False, expand=False, pad_edge=False, box=None)
-        table.add_column("Opção", justify="right", style="bold yellow", width=3)
-        table.add_column("Descrição", style="bold white", width=largura - 5, no_wrap=True)
+        table = Table(show_header=False, expand=False, pad_edge=False, box=None, padding=(1,1))
+        table.add_column("Opção", justify="right", style=M_MAIN, width=3)
+        table.add_column("Descrição", style=M_MAIN, width=largura - 5, no_wrap=True)
 
         # Adiciona as linhas do menu
-        table.add_row("0", "🔌 Finalizar o Programa")
-        table.add_row("1", "🔄 Converter Arquivo")
-        table.add_row("2", "📊 Relatório de Arquivo")
-        table.add_row("3", "🦆 Rodar Query SQL (DuckDB)")
-        table.add_row("4", "🔪 Splitter de Arquivos")
+        table.add_row("0", "⏩ Finalizar o Programa")
+        table.add_row("1", "⏩ Converter Arquivo")
+        table.add_row("2", "⏩ Relatório de Arquivo")
+        table.add_row("3", "⏩ Rodar Query SQL (DuckDB)")
+        table.add_row("4", "⏩ Splitter de Arquivos")
 
-        console.print(Panel(table, width=largura, box=box.ROUNDED))
+        console.print(Panel(table, 
+                            width=largura, 
+                            box=box.ROUNDED, 
+                            style=M_HEADER, 
+                            title="[bold #F6E4C0]MENU[/bold #F6E4C0]", padding= (1,2)))
+                            #padding=(1,2))
 
-        opcao = console.input("\n👉 [bold cyan]Escolha uma opção:[/bold cyan] ")
+        opcao = console.input("\n📌 [bold white]Escolha uma opção:[/bold white] ")
 
         if opcao == "0":
-            console.print("\n[bold red]Saindo... 👋[/bold red]")
+            console.print("\n[bold yellow]Encerrando... 💤[/bold yellow]")
             time.sleep(1)
             os.system("cls" if os.name == "nt" else "clear")
             break

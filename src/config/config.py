@@ -9,8 +9,9 @@ XLSX_DIR.mkdir(parents=True, exist_ok=True)
 CSV_DIR.mkdir(parents=True, exist_ok=True)
 
 
-M_MAIN = "#FFD700"  # Ouro
+M_MAIN = "#F6E4C0"  # Ouro
 M_CONVERTER = "#9ed0ae"  # Verde
 M_REPORT = "#99C8F2"  # Azul
 M_CONFIG    = "#A9A9A9"  # Cinza
 M_DUCK = "#6495ED"
+M_HEADER = "#99C8F2"  # Ouro
