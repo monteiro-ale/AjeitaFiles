@@ -22,11 +22,7 @@ def get_db_tables(con):
         if not [t[0] for t in tables]:
             return []
         else:
-          print("="*65)
-          print("💾 Tabelas já existentes no banco:".center(65))
-          print("="*65)
-          print("\n")
-        return [t[0] for t in tables]
+          return [t[0] for t in tables]
     except Exception as e:
         print(f"Erro ao listar tabelas no banco.{e}")
         return None

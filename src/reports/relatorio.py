@@ -30,7 +30,7 @@ def list_files():
         "Digite \\exit para voltar ao menu anterior",
         "Digite ENTER para selecionar todos os arquivos"
       ]
-      print_header(title, com, M_REPORT)
+      print_header(title, com, M_REPORT, M_CONFIG)
       return files
     else:
         return
@@ -68,7 +68,6 @@ def exec_relatorio(selected):
 def diagnostico_duckdb(filepath, table_name="tabela"):
     con = duckdb.connect()
 
-    # Carrega o CSV como uma tabela
     con.execute(f"""
         CREATE OR REPLACE TABLE {table_name} AS 
         SELECT * FROM read_csv_auto('{str(filepath)}', header=True, SAMPLE_SIZE=-1)
@@ -86,18 +85,18 @@ def printa_diagnostico(con, table_name):
     column_null(con, cols, table_name)
 
 def input_keys(con, cols, table_name):
-    colnames = cols
+    lower_colnames = [c.strip().lower() for c in cols]
 
     console.print("🔑 Informe as colunas-chave para verificar duplicidade")
     console.print("   - Digite os nomes separados por vírgula (ex: ID,EMAIL)")
     console.print("   - Pressione ENTER para pular\n", style="yellow")
-    key_input = input("> ").strip()
+    key_input = input("> ").strip().lower()
     print("\n")
     table_dupes = Table(title="🔹 Duplicidades", show_lines=True)
     table_dupes.add_column("Resultado", style="bold cyan")
 
     if key_input:
-        keys = [k.strip() for k in key_input.split(",") if k.strip() in colnames]
+        keys = [k.strip() for k in key_input.split(",") if k.strip() in lower_colnames]
 
         if not keys:
             table_dupes.add_row("⚠️ Nenhuma chave válida informada")
@@ -156,7 +155,6 @@ def exec_sql_duplicty(con, table_name, where_clause, keys_str):
     return row
 
 def preview_table(con, table_name, max_rows=4, max_cols=10):
-    n_rows = con.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
     cols = [c[1] for c in con.execute(f"PRAGMA table_info({table_name})").fetchall()]
 
     if len(cols) <= max_cols:
@@ -171,14 +169,11 @@ def preview_table(con, table_name, max_rows=4, max_cols=10):
 
         console.print(table)
     else:
-        # se for muita coluna, mostra só a lista organizada
+        # Se for muita coluna, mostra só a lista organizada.
         col_text = ", ".join(cols)
         console.print(
             Panel(col_text, title="Preview de Colunas", border_style="cyan", expand=False)
         )
-    #console.print(f"Linhas: [bold]{n_rows:,}[/bold]")
-    #console.print(f"Colunas: [bold]{len(cols)}[/bold]\n")
-
     return cols
 
 def count_lines_and_columns(con, table_name, cols):

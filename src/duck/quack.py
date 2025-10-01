@@ -69,7 +69,7 @@ def importa_csv_banco(persistence):
     loop_interativo(processed)
 
 
-#function quase inutil, tirar depois.
+#Function quase inutil, tirar depois.
 def mostrar_arquivos_carregados(arquivos):
     print("=" * 60)
     print("⚡ Arquivos carregados em memória:")
@@ -80,39 +80,22 @@ def mostrar_arquivos_carregados(arquivos):
 def list_all(tables, files):
     if tables:
       try:
-        for t in (tables): print(f"- {t}\n")
+        #for t in (tables): print(f"- {t}\n")
+        print_header(":optical_disk: Tabelas já persistidas no database:", tables, M_DUCK, M_CONFIG)
       except: print("Erro ao listar tabelas do banco")
     if files:
-        print("=" * 65)
-        print("\n📂 Arquivos disponíveis para carregar em memória (📂 Folder csv):\n")
-        for idx, f in enumerate(files, start=1): 
-          print(f"{idx} - {f}\n")
+        print_menu(":file_folder: Arquivos disponíveis na folder /csv/:", files, M_DUCK)
+        #for idx, f in enumerate(files, start=1): 
+          #print(f"{idx} - {f}\n")
     else:
         return
 
-#Lista as tabelas do database.
-def list_db_tables(con):
-    try:
-        tables = con.execute("SHOW TABLES").fetchall()
-        if not [t[0] for t in tables]:
-            print("Sem tabelas salvas no banco persistente")
-            return
-        else:
-          print("="*65)
-          print("💾 Tabelas já existentes no banco:".center(65))
-          print("="*65)
-          print("\n")
-        return [t[0] for t in tables]
-    except Exception as e:
-        print(f"Erro ao listar tabelas no banco.{e}")
-        return None
 
 def conectar_duckdb(db_path):
         try:
             return duckdb.connect(database=db_path)
         except Exception as e:
             print(f"Erro ao conectar ao DuckDB: {e}")
-            #print("Diretório atual:", os.getcwd()) # Caso o db de o perdido
             time.sleep(10)
             return None
 

@@ -80,11 +80,11 @@ def print_menu(title: str, options: list[str], style: str = "bold cyan"):
     )   
     console.print(menu_panel)
 
-#Acho que vou precisar, mas por enquanto é inútil.
-def print_header(title: str, options: list[str], style: str = "bold cyan"):
+#Print do header de menu.
+def print_header(title: str, options: list[str], style: str = "bold", fontstyle: str = "bold"):
     menu_items = []
     for opt in (options):
-        item = f"[{M_CONFIG}]- {opt}"
+        item = f"[{fontstyle}]- {opt}"
         menu_items.append(item)
 
     content = "\n".join(menu_items)
