@@ -80,7 +80,7 @@ def print_menu(title: str, options: list[str], style: str = "bold cyan"):
     )   
     console.print(menu_panel)
 
-#Print do header de menu.
+#Print do header.
 def print_header(title: str, options: list[str], style: str = "bold", fontstyle: str = "bold"):
     menu_items = []
     for opt in (options):
@@ -99,7 +99,8 @@ def print_header(title: str, options: list[str], style: str = "bold", fontstyle:
     )   
     console.print(menu_panel)
 
-def commands(title: str, options: list[str], style: str = "bold cyan"):
+#Print dos comandos.
+def commands(options: list[str], style: str ="bold cyan", title: str=":keyboard: Comandos :keyboard:",):
     menu_items = []
     for opt in (options):
         item = f"[{style}]- {opt}"

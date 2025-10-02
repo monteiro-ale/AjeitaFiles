@@ -38,14 +38,13 @@ def pato_menu():
     elif e == "3":
       path = f"{BASE_DIR}"+"\\ajeitafiles.duckdb"
       con = conectar_duckdb(path)
-      loop_interativo(con)
+      exec_sql_query(con)
       return
     else:
         warn("Opção inválida, digite apenas números",1)
         return
 
 def importa_csv_banco(persistence):
-
     con = conectar_duckdb(f"{BASE_DIR}\\ajeitafiles.duckdb")
     if not con:
         return
@@ -65,65 +64,129 @@ def importa_csv_banco(persistence):
     processed = process_files(con, arquivos, persistence)
     if not processed:
         return
-    mostrar_arquivos_carregados(arquivos)
-    loop_interativo(processed)
+    exec_sql_query(processed)
 
-
-#Function quase inutil, tirar depois.
-def mostrar_arquivos_carregados(arquivos):
-    print("=" * 60)
-    print("⚡ Arquivos carregados em memória:")
-    for arq in arquivos:
-        print(f"- {arq}")
-    print("=" * 60)
-
+#Lista as tabelas do database e os arquivos da folder csv.
 def list_all(tables, files):
+    opt = [
+      "Digite os números dos arquivos separados por vírgula",
+      "Digite \\exit para voltar ao menu anterior",
+      "Digite ENTER para selecionar todos os arquivos"            
+      ]
     if tables:
       try:
-        #for t in (tables): print(f"- {t}\n")
-        print_header(":optical_disk: Tabelas já persistidas no database:", tables, M_DUCK, M_CONFIG)
-      except: print("Erro ao listar tabelas do banco")
+        print_header(":duck: MODULO DUCKDB :duck:", opt, M_DUCK, M_CONFIG)
+        print_header(":optical_disk: Tabelas já existentes no database:", tables, M_DUCK, M_CONFIG)
+      except: error("Erro ao listar tabelas do banco")
     if files:
-        print_menu(":file_folder: Arquivos disponíveis na folder /csv/:", files, M_DUCK)
-        #for idx, f in enumerate(files, start=1): 
-          #print(f"{idx} - {f}\n")
+        print_menu(":file_folder: Arquivos disponíveis(Folder/csv/):", files, M_DUCK)
     else:
         return
-
 
 def conectar_duckdb(db_path):
         try:
             return duckdb.connect(database=db_path)
         except Exception as e:
-            print(f"Erro ao conectar ao DuckDB: {e}")
+            error(f"Erro ao conectar ao DuckDB: {e}", 2)
             time.sleep(10)
             return None
 
 def handle_user_choice(files):
     while True:
-        print("=" * 65)
-        print("📁 Selecione os arquivos CSV para carregar")
-        print("🔢 Digite os números dos arquivos separados por vírgula")
-        print("↩️ Digite \\exit para voltar ao menu anterior")
-        print("*️⃣ Digite ENTER para selecionar todos os arquivos")
         escolha = input("\n>").strip()
 
-        if escolha == "\\exit":
+        if escolha in ("\\exit", "exit"):
             return None
         if not escolha:
             return files  
-
         try:
-            indices = [int(x.strip()) - 1 for x in escolha.split(",")]
+            indices = [int(x.strip()) for x in escolha.split(",")]
             if any(i < 0 or i >= len(files) for i in indices):
-                print("⚠️ Um ou mais números estão fora do intervalo válido.")
+                warn("Um ou mais números estão fora do intervalo válido.")
                 continue
-
             arquivos_selecionados = [files[i] for i in indices]
             return arquivos_selecionados
-
         except ValueError:
-            print("⚠️ Entrada inválida. Digite apenas números separados por vírgula.")
+            warn("Entrada inválida. Digite apenas números separados por vírgula.")
+
+def exec_sql_query(con):
+    last_df = None
+    current_page = 0
+    page_size = 20
+    
+    clear()
+    print("=" * 65)
+    print("\n[  MÓDULO SQL INTERATIVO  ]\n")
+    print("Comandos: \\exit, \\tables, \\export, \\next, \\prev\n")
+    print("=" * 65)
+
+    while True:
+        query = input("SQL> ").strip()
+        command = query.lower().split()[0] if query.startswith("\\") else None
+        
+        #Comandos
+        if command == "\\exit":
+            print("Saindo do módulo SQL...")
+            break
+        elif command == "\\tables":
+            display_tables(con)
+        elif command == "\\export":
+            export_last_query(last_df, query)
+        elif command == "\\next":
+            current_page = handle_navigation(last_df, current_page, page_size, "next")
+        elif command == "\\prev":
+            current_page = handle_navigation(last_df, current_page, page_size, "prev")
+            
+        #Queries
+        elif query:
+            # handle_sql_query retorna uma tupla (df, page_num)
+            df_novo, page_nova = handle_sql_query(con, query, page_size)           
+            if df_novo is not None:
+                last_df = df_novo
+                current_page = page_nova
+
+def display_tables(con):
+    try:
+        tabelas = con.execute("SHOW TABLES").fetchall()
+        print("Tabelas carregadas:", [t[0] for t in tabelas])
+    except Exception as e:
+        error(f"Erro ao listar tabelas: {e}")
+
+def handle_sql_query(con, query, page_size):
+    try:
+        df = con.execute(query).df()
+        current_page = 0
+        print_page(df, current_page, page_size)
+        return df, current_page
+    except Exception as e:
+        print(f"Erro na Query: {e}")
+        # Retorna None, None para indicar falha e não atualizar o estado
+        return None, None
+
+def handle_navigation(last_df, current_page, page_size, direction):
+    if last_df is None or last_df.empty:
+        print("Nenhum resultado carregado ainda para navegar.")
+        return current_page
+    
+    total_pages = math.ceil(len(last_df) / page_size)
+    
+    if direction == "next":
+        if current_page < total_pages - 1:
+            new_page = current_page + 1
+        else:
+            print("⚠️ Já está na última página.")
+            new_page = current_page
+            
+    elif direction == "prev":
+        if current_page > 0:
+            new_page = current_page - 1
+        else:
+            print("⚠️ Já está na primeira página.")
+            new_page = current_page
+            
+    if new_page != current_page:
+        print_page(last_df, new_page, page_size)   
+    return new_page
 
 def process_files(con, arquivos, persistence):
       if persistence:
@@ -145,73 +208,10 @@ def process_files(con, arquivos, persistence):
           clear()
           return None
 
-def loop_interativo(con):
-    clear()
-    print("=" * 65)
-    print("\nDigite queries SQL (\\exit para sair, \\tables para listar tabelas, \\export para exportar última consulta)\n")
-    print("Use \\next e \\prev para navegar em resultados grandes.\n")
-    print("=" * 65)
-    
-    last_df = None
-    current_page = 0
-    page_size = 20
-
-    while True:
-        query = input("SQL> ").strip()
-        
-        if query.lower() in ["\\exit", "exit", "quit"]:
-            print("Saindo do módulo SQL...")
-            break
-
-        elif query.lower() in ["\\tables", ".tables"]:
-            tabelas = con.execute("SHOW TABLES").fetchall()
-            print("Tabelas carregadas:", [t[0] for t in tabelas])
-
-        elif query.lower().startswith("\\export"):
-            if last_df is None:
-                print("Nenhuma consulta para exportar ainda.")
-            else:
-                parts = query.split(maxsplit=1)
-                filename = f"{parts[1]}.csv" if len(parts) > 1 else "last_query.csv"
-                path = f"{CSV_DIR}\\{filename}"
-                last_df.to_csv(path, index=False)
-                print(f"Última consulta exportada para {path}")
-
-        elif query.lower() == "\\next":
-            if last_df is not None:
-                total_pages = math.ceil(len(last_df) / page_size)
-                if current_page < total_pages - 1:
-                    current_page += 1
-                    print_page(last_df, current_page, page_size)
-                else:
-                    print("⚠️ Já está na última página.")
-            else:
-                print("Nenhum resultado carregado ainda.")
-
-        elif query.lower() == "\\prev":
-            if last_df is not None:
-                if current_page > 0:
-                    current_page -= 1
-                    print_page(last_df, current_page, page_size)
-                else:
-                    print("⚠️ Já está na primeira página.")
-            else:
-                print("Nenhum resultado carregado ainda.")
-
-        elif query:
-            try:
-                df = con.execute(query).df()
-                last_df = df
-                current_page = 0
-                print_page(last_df, current_page, page_size)
-            except Exception as e:
-                print(f"Erro: {e}")
-
 def print_page(df, page, page_size=20):
     start = page * page_size
     end = start + page_size
     subset = df.iloc[start:end]
-#table = Table(show_header=True, header_style="bold magenta", show_lines=True, box=box.SIMPLE_HEAVY)
     table = Table(show_header=True, header_style="bold magenta")
     for col in subset.columns:
         table.add_column(str(col), overflow="fold")
@@ -221,3 +221,15 @@ def print_page(df, page, page_size=20):
 
     console.print(table)
     print(f"\n📊 Mostrando linhas {start+1}–{min(end, len(df))} de {len(df)} (página {page+1}/{math.ceil(len(df)/page_size)})\n")
+    return
+
+def export_last_query(last_df, query):
+    if last_df is None:
+      print("Nenhuma consulta para exportar ainda.")
+    else:
+        parts = query.split(maxsplit=1)
+        filename = f"{parts[1]}.csv" if len(parts) > 1 else "last_query.csv"
+        path = f"{CSV_DIR}\\{filename}"
+        last_df.to_csv(path, index=False)
+        print(f"Última consulta exportada para {path}")
+

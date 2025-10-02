@@ -2,12 +2,14 @@
 import os
 from src.config.config import CSV_DIR, XLSX_DIR
 
+#Busca os arquivos.
 def get_files(directory: str, extension: str) -> list[str]:
 
     return [
         f for f in os.listdir(directory) 
         if f.lower().endswith(extension.lower())
     ]
+
 
 def get_csv_files() -> list[str]:
     return get_files(CSV_DIR, ".csv")
