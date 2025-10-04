@@ -10,14 +10,15 @@ from src.config.config import *
 
 def split_menu():
     clear()
-    largura = 65
-    title = "⚔️ MODULO SPLITTER ⚔️"
-
-    print("=" * largura)
-    print(title.center(largura))
-    print("=" * largura)
-    info("Este módulo ainda está na versão v.0.")
+    title = ":crossed_swords: MODULO SPLITTER :crossed_swords:"
+    com = [
+      "Digite o número dos arquivos separados por vírgula",
+      "Digite \\exit para voltar ao menu anterior",
+      "Digite ENTER para selecionar todos os arquivos"
+    ]
+    print_header(title, com, M_MAIN, M_CONFIG)
     files = list_files_to_split()
+
     selected = select_file(files)
     if selected is None:
         return
@@ -55,39 +56,31 @@ def list_files_to_split():
         time.sleep(1.5)
         return
     if files:
-        print("=" * 65)
-        print("\n⚔️ Arquivos disponíveis para splittar: (📂 Folder csv):\n")
-        for idx, f in enumerate(files, start=1): 
-            print(f"{idx} - {f}\n")
+        print_menu(":file_folder: Selecione o(s) arquivo(s) da /csv/ para dividir:", files, M_MAIN)
         return files
     else:
         return
 
 def select_file(files):
     while True:
-        print("=" * 65)
-        print("📁 Selecione os arquivos .CSV para splittar")
-        print("🔢 Digite os números dos arquivos separados por vírgula")
-        print("↩️ Digite \\exit para voltar ao menu anterior")
-        print("🗃️ Digite ENTER para selecionar todos os arquivos")
         escolha = input("\n>").strip()
 
-        if escolha == "\\exit":
+        if escolha in ("\\exit", "exit", "00"):
             return None
         if not escolha:
             return files  
 
         try:
-            indices = [int(x.strip()) - 1 for x in escolha.split(",")]
+            indices = [int(x.strip()) for x in escolha.split(",")]
             if any(i < 0 or i >= len(files) for i in indices):
-                print("⚠️ Um ou mais números estão fora do intervalo válido.")
+                warn("Um ou mais números estão fora do intervalo válido.")
                 continue
 
             arquivos_selecionados = [files[i] for i in indices]
             return arquivos_selecionados
 
         except ValueError:
-            print("⚠️ Entrada inválida. Digite apenas números separados por vírgula.")
+            warn("Entrada inválida. Digite apenas números separados por vírgula.")
 
 def detect_separator(filepath, sample_size=1024, fallback_sep=','):
     try:
