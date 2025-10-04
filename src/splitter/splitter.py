@@ -56,7 +56,7 @@ def list_files_to_split():
         time.sleep(1.5)
         return
     if files:
-        print_menu(":file_folder: Selecione o(s) arquivo(s) da /csv/ para dividir:", files, M_MAIN)
+        print_menu(":file_folder: Selecione o arquivo da /csv/ para dividir:", files, M_MAIN)
         return files
     else:
         return
